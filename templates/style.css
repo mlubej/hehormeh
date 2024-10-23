@@ -1,0 +1,13 @@
+.collapsible-header {
+  cursor: pointer;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.collapse {
+  transition: max-height 0.5s;
+}
+
+.collapse.show {
+  max-height: 100px; /* adjust to your desired height */
+}

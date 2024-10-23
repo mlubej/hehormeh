@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>FlaskBlog</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+
+  <body>
+    <h2>{{ cat }}</h2>
+    <a href="{{ url_for('index') }}">Go home</a>
+    <h4>How Funny and Cringe?</h4>
+
+    <hr style="width: 100%; height: 5px; background-color: black" />
+
+    <form action="/" method="post">
+      {% for image in images %}
+      <div style="width: 100%; overflow: hidden">
+        <div style="width: 50%; float: left"><img src="{{ image }}" /></div>
+        <div style="margin-left: 60%">
+          <div>Funny</div>
+          <select name="'funny_{{ loop.index0 }}" >
+            <option value="-1" selected>I am the author</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+          <div>Cringe</div>
+          <select name="cringe_{{ loop.index0 }}" >
+            <option value="-1" selected>I am the author</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+      </div>
+      <br />
+      <hr style="width: 100%; height: 5px; background-color: black" />
+      {% endfor %}
+
+      <input type="submit" value="Submit values" />
+      <input type="hidden" name="category" value="{{cat}}" />
+    </form>
+  </body>
+</html>

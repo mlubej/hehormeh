@@ -17,8 +17,12 @@
     {% else %}
       Logged in as: <b>{{ username }}</b>
 
-      <h3>Go to current <a href="{{ url_for('categories') }}">category</a></h3>
+      <h3>Go to category:</h3>
 
+      {% for cat_id, cat in categories.items() %}
+        <a href="{{ url_for('category', cat_id=cat_id) }}">{{cat}}</a>
+        <br>
+      {% endfor %}
 
     {% endif %}
 
