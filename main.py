@@ -37,7 +37,8 @@ def login():
     if request.method == "POST":
         mode = "w" if not os.path.exists(IP_TO_USER_CSV) else "a"
         with open(IP_TO_USER_CSV, mode) as f:
-            f.write(f"{request.remote_addr},{request.form["user"]}\n")
+            user = request.form["user"]
+            f.write(f"{request.remote_addr},{user}\n")
 
         return redirect(url_for("index"))
 

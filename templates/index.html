@@ -17,7 +17,9 @@
     {% else %}
       Logged in as: <b>{{ username }}</b>
 
-      
+      <h3>Go to current <a href="{{ url_for('categories') }}">category</a></h3>
+
+
     {% endif %}
 
     <!-- <h2>{{ '%s - go to' % ('' if not user else 'Button') }}</h2> -->
