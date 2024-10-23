@@ -10,13 +10,11 @@ DB_PATH = "./db"
 IP_TO_USER_FILE = os.path.join(DB_PATH, "ip_to_user.csv")
 VOTES_FILE = os.path.join(DB_PATH, "votes.csv")
 
-
-app = Flask(__name__, static_folder=STATIC_PATH)
-
-
 ID2CAT_PATH = {idx: cat.split("static/")[-1] for idx, cat in enumerate(sorted(glob(f"{STATIC_PATH}/meme_files/*")))}
 ID2CAT = {idx: cat.split("/")[-1] for idx, cat in ID2CAT_PATH.items()}
 CAT2ID = {cat: idx for idx, cat in ID2CAT.items()}
+
+app = Flask(__name__, static_folder=STATIC_PATH)
 
 
 def check_votes(funny_votes, cringe_votes):
