@@ -3,8 +3,10 @@ from glob import glob
 
 import pandas as pd
 from flask import Flask, redirect, render_template, request, url_for
+from werkzeug.utils import secure_filename
 
 STATIC_PATH = __file__.replace("main.py", "static")
+UPLOAD_PATH = f"{STATIC_PATH}/meme_files"
 DB_PATH = "./db"
 
 IP_TO_USER_FILE = os.path.join(DB_PATH, "ip_to_user.csv")
@@ -15,6 +17,10 @@ ID2CAT = {idx: cat.split("/")[-1] for idx, cat in ID2CAT_PATH.items()}
 CAT2ID = {cat: idx for idx, cat in ID2CAT.items()}
 
 app = Flask(__name__, static_folder=STATIC_PATH)
+app.config['UPLOAD_FOLDER'] = UPLOAD_PATH
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1000 * 1000 # Limit upload data to 100 MB
+
+ALLOWED_IMG_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
 def check_votes(funny_votes, cringe_votes):
@@ -108,3 +114,32 @@ def category(cat_id: int):
     images = glob(f"static/meme_files/{ID2CAT[cat_id]}/*.jpg")
 
     return render_template("category.html", cat=ID2CAT[cat_id], category_id=cat_id, images=images)
+
+# Function to check if the file has an allowed extension
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_IMG_EXTENSIONS
+
+
+# TODO: Display memes already uploaded.
+@app.route("/upload", methods=["POST", "GET"])
+def upload():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            print("No request")
+            return redirect(request.url)
+        file = request.files['file']
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == '':
+            print("Empty filename")
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            cat = request.form.get("category")
+            print(cat)
+            file.save(os.path.join(f"{UPLOAD_PATH}/{cat}", filename))
+            # return redirect(url_for('download_file', name=filename))
+
+    return render_template("upload.html", categories=CAT2ID)

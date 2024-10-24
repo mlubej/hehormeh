@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>FlaskBlog</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+
+  <body>
+    <a href="{{ url_for('index') }}">Go home</a>
+    <h1>Upload your memes for each category</h1>
+
+
+    {% for cat, idx in categories.items() %}
+        <h2> {{ cat }} </h2>
+
+        <form method=post enctype=multipart/form-data>
+            <input type=file name=file>
+            <input type=submit value=Upload>
+            <input type="hidden" name="category" value="{{cat}}">
+        </form>
+    {% endfor %}
+
+
+  </body>
+</html>
+
