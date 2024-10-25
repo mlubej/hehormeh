@@ -18,10 +18,10 @@ ID2CAT = {idx: cat.split("/")[-1] for idx, cat in ID2CAT_PATH.items()}
 CAT2ID = {cat: idx for idx, cat in ID2CAT.items()}
 
 app = Flask(__name__, static_folder=STATIC_PATH)
-app.config['UPLOAD_FOLDER'] = UPLOAD_PATH
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1000 * 1000 # Limit upload data to 100 MB
+app.config["UPLOAD_FOLDER"] = UPLOAD_PATH
+app.config["MAX_CONTENT_LENGTH"] = 100 * 1000 * 1000  # Limit upload data to 100 MB
 
-ALLOWED_IMG_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_IMG_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 
 def check_votes(funny_votes, cringe_votes):
@@ -68,10 +68,8 @@ def index():
         # check user votes
         if not check_votes(funny_votes, cringe_votes):
             raise ValueError(
-                (
-                    "You have not voted correctly! You can only be an author of one image per category, "
-                    "and you should mark it for both categories!"
-                )
+                "You have not voted correctly! You can only be an author of one image per category, "
+                "and you should mark it for both categories!"
             )
 
         # TODO: read/write with dataframes?
@@ -111,15 +109,14 @@ def get_user(ip: str) -> str | None:
 
 @app.route("/category_<int:cat_id>", methods=["GET"])
 def category(cat_id: int):
-    images = [im for ext in ALLOWED_IMG_EXTENSIONS
-           for im in glob(f"static/meme_files/{ID2CAT[cat_id]}/*.{ext}")]
+    images = [im for ext in ALLOWED_IMG_EXTENSIONS for im in glob(f"static/meme_files/{ID2CAT[cat_id]}/*.{ext}")]
 
     return render_template("category.html", cat=ID2CAT[cat_id], category_id=cat_id, images=images)
 
+
 # Function to check if the file has an allowed extension
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_IMG_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMG_EXTENSIONS
 
 
 # Return a dict with images uploaded by a user for each category
@@ -137,15 +134,15 @@ def get_uploaded_images(username: str) -> dict | None:
 @app.route("/upload", methods=["POST", "GET"])
 def upload():
     username = get_user(request.remote_addr)
-    if request.method == 'POST':
+    if request.method == "POST":
         # check if the post request has the file part
-        if 'file' not in request.files:
+        if "file" not in request.files:
             print("No request")
             return redirect(request.url)
-        file = request.files['file']
+        file = request.files["file"]
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
-        if file.filename == '':
+        if file.filename == "":
             print("Empty filename")
             return redirect(request.url)
         if file and allowed_file(file.filename):
@@ -157,7 +154,7 @@ def upload():
             # TODO: Remove older images of users in case he/she already uploaded an image for a give category
             mode = "w" if not os.path.exists(USER_TO_IMAGE_FILE) else "a"
             with open(USER_TO_IMAGE_FILE, mode) as f:
-                f.write(f'{username},{cat},static/meme_files/{cat}/{filename}\n')
+                f.write(f"{username},{cat},static/meme_files/{cat}/{filename}\n")
 
             return redirect(request.url)
 
