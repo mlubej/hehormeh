@@ -3,6 +3,7 @@
 import os
 
 import pandas as pd
+from flask import abort
 
 from .config import (
     ALLOWED_IMG_EXTENSIONS,
@@ -78,4 +79,20 @@ def get_uploaded_images(username: str) -> dict:
 
     # Only take the last one in case a user uploaded more then one picture per category
     # TODO: make sure there is only one image per category
-    return filtered_df.groupby("cat")["image"].last().to_dict()
+def read_data(csv_file: str) -> pd.DataFrame:
+    """Read data from a file. First line is the header. Index is not set."""
+    return pd.read_csv(csv_file, header=0)
+
+
+def write_line(content: dict, csv_file: str):
+    """Write a line to a file. If the line already exists, the line will be overwritten."""
+    os.makedirs(os.path.dirname(csv_file), exist_ok=True)
+
+    columns = list(content.keys())
+    existing_data = read_data(csv_file) if os.path.exists(csv_file) else pd.DataFrame(columns=columns)
+
+    if not existing_data.empty and set(columns) != set(existing_data.columns):
+        abort(400, description="Content does not match existing data.")
+
+    new_data = pd.concat([existing_data, pd.DataFrame(content, index=[0])])
+    new_data.to_csv(csv_file, index=False)
