@@ -1,3 +1,5 @@
+"""Main module for the hehormeh Flask app."""
+
 import os
 from glob import glob
 
@@ -25,6 +27,10 @@ ALLOWED_IMG_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 
 def check_votes(funny_votes, cringe_votes):
+    """Check if the user has voted correctly.
+
+    The user can only be the author of one image per category and should mark it for both categories.
+    """
     author_votes_funny = [k for k, v in funny_votes.items() if v == -1]
     author_votes_cringe = [k for k, v in cringe_votes.items() if v == -1]
     if len(author_votes_funny) != 1 or len(author_votes_cringe) != 1:
@@ -37,6 +43,7 @@ def check_votes(funny_votes, cringe_votes):
 
 
 def has_everyone_voted(category_id: int) -> bool:
+    """Check if everyone has voted for a given category."""
     all_users = pd.read_csv(IP_TO_USER_FILE, names=["ip", "user"]).user.nunique()
 
     vote_cols = ["user", "cat_id", "meme_id", "funny", "cringe"]
@@ -46,7 +53,8 @@ def has_everyone_voted(category_id: int) -> bool:
     return all_users == n_users_category
 
 
-def get_eligible_categories() -> dict:
+def get_next_votable_category() -> dict:
+    """Return the next category that the user can vote for."""
     categories = {cat_id: cat for cat_id, cat in ID2CAT.items() if not has_everyone_voted(cat_id)}
 
     if len(categories) == 0:
@@ -58,6 +66,7 @@ def get_eligible_categories() -> dict:
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    """Display the main page of the app."""
     username = get_user(request.remote_addr)
 
     if request.method == "POST":
@@ -80,11 +89,12 @@ def index():
 
         return redirect("/")
 
-    return render_template("index.html", username=username, categories=get_eligible_categories())
+    return render_template("index.html", username=username, categories=get_next_votable_category())
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """Display the login page of the app."""
     # TODO: show categories only after being logged in
     # Show only the next category, not all of them
     # don't add duplicates to the csv file
@@ -100,6 +110,7 @@ def login():
 
 
 def get_user(ip: str) -> str | None:
+    """Get the user from the IP address."""
     if not os.path.exists(IP_TO_USER_FILE):
         return None
 
@@ -109,6 +120,7 @@ def get_user(ip: str) -> str | None:
 
 @app.route("/category_<int:cat_id>", methods=["GET"])
 def category(cat_id: int):
+    """Display the images for a given category."""
     images = [im for ext in ALLOWED_IMG_EXTENSIONS for im in glob(f"static/meme_files/{ID2CAT[cat_id]}/*.{ext}")]
 
     return render_template("category.html", cat=ID2CAT[cat_id], category_id=cat_id, images=images)
@@ -116,11 +128,13 @@ def category(cat_id: int):
 
 # Function to check if the file has an allowed extension
 def allowed_file(filename):
+    """Check if the file has an allowed extension."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMG_EXTENSIONS
 
 
 # Return a dict with images uploaded by a user for each category
 def get_uploaded_images(username: str) -> dict | None:
+    """Return a dict with images uploaded by a user for each category."""
     if not os.path.exists(USER_TO_IMAGE_FILE):
         return None
 
@@ -133,6 +147,7 @@ def get_uploaded_images(username: str) -> dict | None:
 
 @app.route("/upload", methods=["POST", "GET"])
 def upload():
+    """Display the upload page of the app."""
     username = get_user(request.remote_addr)
     if request.method == "POST":
         # check if the post request has the file part
