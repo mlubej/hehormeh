@@ -13,6 +13,20 @@ from .config import (
 )
 
 
+def allowed_file(filename):
+    """Check if the file has an allowed extension."""
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMG_EXTENSIONS
+
+
+def get_user_or_none(ip: str) -> str | None:
+    """Get the user from the IP address."""
+    if not os.path.exists(IP_TO_USER_FILE):
+        return None
+
+    mapping = dict(pd.read_csv(IP_TO_USER_FILE, names=["ip", "user"]).values)
+    return mapping.get(ip, None)
+
+
 def check_votes(funny_votes, cringe_votes):
     """Check if the user has voted correctly.
 
@@ -51,22 +65,6 @@ def get_next_votable_category() -> dict:
     return {next_cat_id: categories[next_cat_id]}
 
 
-def get_user_or_none(ip: str) -> str | None:
-    """Get the user from the IP address."""
-    if not os.path.exists(IP_TO_USER_FILE):
-        return None
-
-    mapping = dict(pd.read_csv(IP_TO_USER_FILE, names=["ip", "user"]).values)
-    return mapping.get(ip, None)
-
-
-# Function to check if the file has an allowed extension
-def allowed_file(filename):
-    """Check if the file has an allowed extension."""
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMG_EXTENSIONS
-
-
-# Return a dict with images uploaded by a user for each category
 def get_uploaded_images(username: str) -> dict:
     """Return a dict with images uploaded by a user for each category."""
     if not os.path.exists(USER_TO_IMAGE_FILE):
