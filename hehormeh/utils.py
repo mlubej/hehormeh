@@ -45,6 +45,9 @@ def check_votes(funny_votes, cringe_votes):
 
 def has_everyone_voted(category_id: int) -> bool:
     """Check if everyone has voted for a given category."""
+    if not os.path.exists(IP_TO_USER_FILE) or not os.path.exists(VOTES_FILE):
+        return False
+
     all_users = pd.read_csv(IP_TO_USER_FILE, names=["ip", "user"]).user.nunique()
 
     vote_cols = ["user", "cat_id", "meme_id", "funny", "cringe"]
