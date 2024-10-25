@@ -74,11 +74,14 @@ def get_uploaded_images(username: str) -> dict:
     if not os.path.exists(USER_TO_IMAGE_FILE):
         return dict()
 
-    df = pd.read_csv(USER_TO_IMAGE_FILE, names=["user", "cat", "image"])
-    filtered_df = df[df["user"] == username]
+    df = read_data(USER_TO_IMAGE_FILE)
+    df = df[df["user"] == username]
 
     # Only take the last one in case a user uploaded more then one picture per category
     # TODO: make sure there is only one image per category
+    return df.groupby("cat_id")["img_path"].last().to_dict()
+
+
 def read_data(csv_file: str) -> pd.DataFrame:
     """Read data from a file. First line is the header. Index is not set."""
     return pd.read_csv(csv_file, header=0)
