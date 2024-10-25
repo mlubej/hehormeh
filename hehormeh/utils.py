@@ -93,5 +93,5 @@ def write_line(content: dict, csv_file: str):
     if not existing_data.empty and set(columns) != set(existing_data.columns):
         abort(400, description="Content does not match existing data.")
 
-    new_data = pd.concat([existing_data, pd.DataFrame(content, index=[0])])
+    new_data = pd.concat([existing_data, pd.DataFrame(content, index=[0])]).drop_duplicates(keep="last")
     new_data.to_csv(csv_file, index=False)
