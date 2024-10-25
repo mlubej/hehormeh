@@ -1,22 +1,17 @@
 """Utility functions for the hehormeh app."""
 
 import os
+from pathlib import Path
 
 import pandas as pd
 from flask import abort
 
-from .config import (
-    ALLOWED_IMG_EXTENSIONS,
-    ID2CAT,
-    IP_TO_USER_FILE,
-    USER_TO_IMAGE_FILE,
-    VOTES_FILE,
-)
+from .config import ALLOWED_IMG_EXTENSIONS, ID2CAT, IP_TO_USER_FILE, USER_TO_IMAGE_FILE, VOTES_FILE
 
 
 def allowed_file(filename):
     """Check if the file has an allowed extension."""
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMG_EXTENSIONS
+    return Path(filename).suffix.lower() in ALLOWED_IMG_EXTENSIONS
 
 
 def get_user_or_none(ip: str) -> str | None:
