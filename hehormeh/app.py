@@ -1,6 +1,8 @@
 """Main module for the hehormeh Flask app."""
 
+import uuid
 from glob import glob
+from pathlib import Path
 
 from flask import Flask, abort, redirect, render_template, request, url_for
 from werkzeug.utils import secure_filename
@@ -97,10 +99,11 @@ def upload():
         # TODO: Remove older images of users in case he/she already uploaded an image for a give category
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
+            unique_name = uuid.uuid4().hex + Path(filename).suffix
             cat = request.form.get("category")
-            file.save(UPLOAD_PATH / cat / filename)
+            file.save(UPLOAD_PATH / cat / unique_name)
 
-            content = {"user": username, "cat_id": CAT2ID[cat], "img_path": f"static/meme_files/{cat}/{filename}"}
+            content = {"user": username, "cat_id": CAT2ID[cat], "img_name": unique_name}
             write_line(content, USER_TO_IMAGE_FILE)
             return redirect(request.url)
 

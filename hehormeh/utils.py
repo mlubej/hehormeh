@@ -71,6 +71,7 @@ def get_uploaded_images(username: str) -> dict:
 
     df = read_data(USER_TO_IMAGE_FILE)
     df = df[df["user"] == username]
+    df["img_path"] = df.apply(lambda r: f"static/meme_files/{ID2CAT[r.cat_id]}/{r.img_name}", axis=1)
 
     # Only take the last one in case a user uploaded more then one picture per category
     # TODO: make sure there is only one image per category
