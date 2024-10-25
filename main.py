@@ -11,6 +11,7 @@ DB_PATH = "./db"
 
 IP_TO_USER_FILE = os.path.join(DB_PATH, "ip_to_user.csv")
 VOTES_FILE = os.path.join(DB_PATH, "votes.csv")
+USER_TO_IMAGE_FILE = os.path.join(DB_PATH, "user_to_image.csv")
 
 ID2CAT_PATH = {idx: cat.split("static/")[-1] for idx, cat in enumerate(sorted(glob(f"{STATIC_PATH}/meme_files/*")))}
 ID2CAT = {idx: cat.split("/")[-1] for idx, cat in ID2CAT_PATH.items()}
@@ -110,8 +111,8 @@ def get_user(ip: str) -> str | None:
 
 @app.route("/category_<int:cat_id>", methods=["GET"])
 def category(cat_id: int):
-    # categories = [path.split("/")[-1] for path in glob(f"{STATIC_PATH}/meme_files/*")]
-    images = glob(f"static/meme_files/{ID2CAT[cat_id]}/*.jpg")
+    images = [im for ext in ALLOWED_IMG_EXTENSIONS
+           for im in glob(f"static/meme_files/{ID2CAT[cat_id]}/*.{ext}")]
 
     return render_template("category.html", cat=ID2CAT[cat_id], category_id=cat_id, images=images)
 
@@ -121,9 +122,21 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_IMG_EXTENSIONS
 
 
-# TODO: Display memes already uploaded.
+# Return a dict with images uploaded by a user for each category
+def get_uploaded_images(username: str) -> dict | None:
+    if not os.path.exists(USER_TO_IMAGE_FILE):
+        return None
+
+    df = pd.read_csv(USER_TO_IMAGE_FILE, names=["user", "cat", "image"])
+    filtered_df = df[df["user"] == username]
+
+    # Only take the last one in case a user uploaded more then one picture per category
+    return filtered_df.groupby("cat")["image"].last().to_dict()
+
+
 @app.route("/upload", methods=["POST", "GET"])
 def upload():
+    username = get_user(request.remote_addr)
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -140,6 +153,13 @@ def upload():
             cat = request.form.get("category")
             print(cat)
             file.save(os.path.join(f"{UPLOAD_PATH}/{cat}", filename))
-            # return redirect(url_for('download_file', name=filename))
 
-    return render_template("upload.html", categories=CAT2ID)
+            # TODO: Remove older images of users in case he/she already uploaded an image for a give category
+            mode = "w" if not os.path.exists(USER_TO_IMAGE_FILE) else "a"
+            with open(USER_TO_IMAGE_FILE, mode) as f:
+                f.write(f'{username},{cat},static/meme_files/{cat}/{filename}\n')
+
+            return redirect(request.url)
+
+    uploaded_images = get_uploaded_images(username)
+    return render_template("upload.html", categories=ID2CAT, images=uploaded_images)
