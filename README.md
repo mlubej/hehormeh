@@ -19,7 +19,7 @@ $ pip install -e .[dev]
 Make sure to install also the `pre-commit` for auto-formatting
 
 ```bash
-$ pre-commit install`
+$ pre-commit install
 ```
 
 ## Running the server
