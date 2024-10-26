@@ -78,7 +78,7 @@ def login():
 @app.route("/category_<int:cat_id>", methods=["GET"])
 def category(cat_id: int):
     """Display the images for a given category."""
-    images = [im for ext in ALLOWED_IMG_EXTENSIONS for im in glob(f"static/meme_files/{ID2CAT[cat_id]}/*.{ext}")]
+    images = [im for im in glob(f"static/meme_files/{ID2CAT[cat_id]}/*") if Path(im).suffix in ALLOWED_IMG_EXTENSIONS]
 
     return render_template("category.html", cat=ID2CAT[cat_id], category_id=cat_id, images=images)
 
