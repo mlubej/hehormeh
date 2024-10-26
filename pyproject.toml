@@ -1,7 +1,57 @@
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
 [project]
 name = "hehormeh"
-version = "0.1.0"
-description = "Add your description here"
+version = "1.0.0"
+description = "Hehormeh is a Python package that does nothing."
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["flask", "pandas", "click"]
+
+[project.scripts]
+hehormeh-start = "hehormeh.cli:start_server"
+
+[project.optional-dependencies]
+dev = ["ruff", "pre-commit"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["D", "E", "F", "W", "UP", "I001"]
+ignore = [
+    "D105", # D105 Missing docstring in magic method
+    "D107", # D107 Missing docstring in `__init__`
+]
+fixable = ["ALL"]
+
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "tests/conftest.py",
+    "venv",
+    "mkdocs.yaml",
+    "src/fbsl/db/alembic/versions/*",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["D104"]

@@ -1,22 +1,40 @@
-To start run:
+# HehOrMeh
+
+Welcome to the HehOrMeh page!
+
+## Installation
+
+Check out and install the package with
 
 ```bash
-flask --app main run --debug --host 0.0.0.0
+$ pip install .
 ```
 
-1. Scoring code + page
-   - do we really need a page for the score? It might be more dramatic to
-   announce the winner via a cringe speach
-2. Handle empty username
-3. User pd.Dataframe to read/write to CSV files
-4. Extend category eligibility check functionality to lock other category pages
-   - unlock all when everything is finished
-5. Meme upload page
-6. auto create folders
+If you're a developer, you can install an editable package with developer functionalities
 
-Nice to have:
+```bash
+$ pip install -e '.[dev]'
+```
 
-- dont add duplicate entries to IP2USER mapping
-- offer list of registered users
-- secretly save images of people so that we have a celebration page for the winner with the inserted picture
-- page for trash/rejected memes
+Make sure to install also the `pre-commit` for auto-formatting
+
+```bash
+$ pre-commit install
+```
+
+## Running the server
+
+You can start the server with
+
+```bash
+$ hehormeh-start
+```
+
+If you need any more options...
+
+```
+Options:
+  -p, --port INTEGER Port to run the server on
+  -d, --debug Enable debug mode
+  --help Show this message and exit.
+```
