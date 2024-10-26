@@ -14,7 +14,7 @@
     <h1>Upload your memes for each category</h1>
 
 
-    {% for idx, cat in categories.items() %}
+    {% for cat_id, cat in categories.items() %}
         <h2> {{ cat }} </h2>
 
         <form method=post enctype=multipart/form-data>
@@ -23,8 +23,8 @@
             <input type="hidden" name="category" value="{{cat}}">
         </form>
 
-      {% if images.get(cat) %}
-          <img src="{{ images[cat] }}" width="400" />
+      {% if images.get(cat_id) %}
+          <img src="{{ images[cat_id] }}" width="400" />
       {% else %}
           <p>Nalozi sliko, frend</p>
       {% endif %}

@@ -4,7 +4,7 @@ import os
 from glob import glob
 from pathlib import Path
 
-ROOT_DIR = Path(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+ROOT_DIR = Path(os.path.dirname(os.path.abspath(__file__))) / ".."
 
 DB_PATH = ROOT_DIR / "db"
 STATIC_PATH = ROOT_DIR / "static"
@@ -19,4 +19,4 @@ ID2PATH = {idx: cat.split("static/")[-1] for idx, cat in enumerate(CATEGORIES)}
 ID2CAT = {idx: cat.split("/")[-1] for idx, cat in ID2PATH.items()}
 CAT2ID = {cat: idx for idx, cat in ID2CAT.items()}
 
-ALLOWED_IMG_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+ALLOWED_IMG_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif"}
