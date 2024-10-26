@@ -13,7 +13,7 @@ $ pip install .
 If you're a developer, you can install an editable package with developer functionalities
 
 ```bash
-$ pip install -e .[dev]
+$ pip install -e '.[dev]'
 ```
 
 Make sure to install also the `pre-commit` for auto-formatting

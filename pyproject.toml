@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Hehormeh is a Python package that does nothing."
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["flask", "pandas"]
+dependencies = ["flask", "pandas", "click"]
 
 [project.scripts]
 hehormeh-start = "hehormeh.cli:start_server"
