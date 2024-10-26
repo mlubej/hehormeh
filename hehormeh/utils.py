@@ -51,7 +51,7 @@ def get_next_votable_category() -> dict:
     return {next_cat_id: categories[next_cat_id]}
 
 
-def get_user(ip: str) -> str | None:
+def get_user_or_none(ip: str) -> str | None:
     """Get the user from the IP address."""
     if not os.path.exists(IP_TO_USER_FILE):
         return None

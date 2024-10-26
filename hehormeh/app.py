@@ -3,7 +3,7 @@
 import os
 from glob import glob
 
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, abort, redirect, render_template, request, url_for
 from werkzeug.utils import secure_filename
 
 from .config import (
@@ -16,17 +16,17 @@ from .config import (
     USER_TO_IMAGE_FILE,
     VOTES_FILE,
 )
-from .utils import allowed_file, check_votes, get_next_votable_category, get_uploaded_images, get_user
+from .utils import allowed_file, check_votes, get_next_votable_category, get_uploaded_images, get_user_or_none
 
 app = Flask(__name__, static_folder=STATIC_PATH)
 app.config["UPLOAD_FOLDER"] = UPLOAD_PATH
-app.config["MAX_CONTENT_LENGTH"] = 100 * 1000 * 1000  # Limit upload data to 100 MB
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024**2  # Limit upload data to 10 MiB
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     """Display the main page of the app."""
-    username = get_user(request.remote_addr)
+    username = get_user_or_none(request.remote_addr)
 
     if request.method == "POST":
         cat = request.form["category"]
@@ -35,9 +35,10 @@ def index():
 
         # check user votes
         if not check_votes(funny_votes, cringe_votes):
-            raise ValueError(
-                "You have not voted correctly! You can only be an author of one image per category, "
-                "and you should mark it for both categories!"
+            abort(
+                400,
+                description="You have not voted correctly! You can only be an author of one image per category, "
+                "and you should mark it for both categories!",
             )
 
         # TODO: read/write with dataframes?
@@ -54,18 +55,19 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Display the login page of the app."""
-    # TODO: show categories only after being logged in
-    # Show only the next category, not all of them
     # don't add duplicates to the csv file
-    # TODO:Handle empty user
     if request.method == "POST":
+        username = request.form["user"]
+        if not username:
+            abort(400, description="Please enter a valid username!")
+
         mode = "w" if not os.path.exists(IP_TO_USER_FILE) else "a"
         with open(IP_TO_USER_FILE, mode) as f:
             f.write(f'{request.remote_addr},{request.form["user"]}\n')
 
         return redirect(url_for("index"))
 
-    return render_template("login.html")  # TODO: show that you are logged in as user
+    return render_template("login.html")
 
 
 @app.route("/category_<int:cat_id>", methods=["GET"])
@@ -79,7 +81,7 @@ def category(cat_id: int):
 @app.route("/upload", methods=["POST", "GET"])
 def upload():
     """Display the upload page of the app."""
-    username = get_user(request.remote_addr)
+    username = get_user_or_none(request.remote_addr)
     if request.method == "POST":
         # check if the post request has the file part
         if "file" not in request.files:
