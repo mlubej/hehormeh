@@ -94,8 +94,8 @@ def upload():
 
         # TODO: Remove older images of users in case he/she already uploaded an image for a give category
         if file and has_valid_extension(file.filename):
-            filename = Path(secure_filename(file.filename))
-            hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + filename.suffix
+            filename = secure_filename(file.filename)
+            hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
             cat = request.form.get("category")
             file.save(UPLOAD_PATH / cat / hash_name)
 
