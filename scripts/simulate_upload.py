@@ -36,5 +36,3 @@ for idx, (user, ip) in enumerate(users_and_ips.items()):
             data={"cat_id": cat_id},
             headers=headers,
         )
-        # break
-    # break
