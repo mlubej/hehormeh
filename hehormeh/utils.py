@@ -100,8 +100,8 @@ def write_line(content: dict, csv_file: str):
     new_data.to_csv(csv_file, index=False)
 
 
-def delete_image(image_path: str):
-    """Delete image with given name."""
+def reset_image(image_path: str):
+    """Reset image with given name."""
     image_path = Path(image_path)
     df = read_data(USER_TO_IMAGE_FILE)
     df = df[df.img_name != image_path.name]

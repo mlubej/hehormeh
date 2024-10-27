@@ -20,11 +20,11 @@ from .config import (
 )
 from .utils import (
     check_votes,
-    delete_image,
     get_next_votable_category,
     get_uploaded_images,
     get_user_or_none,
     has_valid_extension,
+    reset_image,
     write_line,
 )
 
@@ -93,7 +93,7 @@ def upload():
         # Image reset button was pressed
         if image_to_delete is not None:
             # Delete entry from user_to_image.csv and remove image from uploads
-            delete_image(image_to_delete)
+            reset_image(image_to_delete)
 
         file = request.files.get("file", None)
         if not file or file.filename == "":
