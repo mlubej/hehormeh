@@ -1,6 +1,7 @@
 """Main module for the hehormeh Flask app."""
 
 import hashlib
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -11,7 +12,7 @@ from .config import (
     HASH_SIZE,
     ID2CAT,
     IP_TO_USER_FILE,
-    STATIC_PATH,
+    ROOT_DIR,
     UPLOAD_PATH,
     USER_TO_IMAGE_FILE,
     VOTES_FILE,
@@ -26,15 +27,20 @@ from .utils import (
     write_line,
 )
 
-app = Flask(__name__, static_folder=STATIC_PATH)
+app = Flask(__name__, static_folder=ROOT_DIR / "static")
 app.config["UPLOAD_FOLDER"] = UPLOAD_PATH
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024**2  # Limit upload data to 10 MiB
+
+
+def get_remote_addr(request):
+    """Use 'X-Test-Ip' header if present, otherwise fall back to `request.remote_addr`."""
+    return request.headers.get("X-Test-IP", request.remote_addr)
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     """Display the main page of the app."""
-    username = get_user_or_none(request.remote_addr)
+    username = get_user_or_none(get_remote_addr(request))
 
     if request.method == "POST":
         cat_id = request.form["cat_id"]
@@ -68,7 +74,7 @@ def login():
         if not username:
             abort(400, description="Please enter a valid username!")
 
-        content = {"ip": request.remote_addr, "user": username}
+        content = {"ip": get_remote_addr(request), "user": username}
         write_line(content, IP_TO_USER_FILE)
         return redirect(url_for("index"))
 
@@ -80,7 +86,7 @@ def vote(cat_id: int):
     """Display the images for a given category."""
     df = pd.read_csv(USER_TO_IMAGE_FILE)
     df = df[df.cat_id == cat_id]
-    df["img_path"] = df.img_name.apply(lambda name: f"static/meme_files/{ID2CAT[cat_id]}/{name}")
+    df["img_path"] = df.img_name.apply(lambda name: UPLOAD_PATH / ID2CAT[cat_id] / name)
     img_and_author_info = {row.img_path: row.user == get_user_or_none(request.remote_addr) for _, row in df.iterrows()}
     return render_template("vote.html", cat_id=cat_id, cat=ID2CAT[cat_id], image_and_author_info=img_and_author_info)
 
@@ -88,13 +94,11 @@ def vote(cat_id: int):
 @app.route("/upload", methods=["POST", "GET"])
 def upload():
     """Display the upload page of the app."""
-    username = get_user_or_none(request.remote_addr)
+    username = get_user_or_none(get_remote_addr(request))
     if request.method == "POST":
-        image_to_delete = request.form.get("image_to_delete")
-        # Image reset button was pressed
-        if image_to_delete is not None:
-            # Delete entry from user_to_image.csv and remove image from uploads
-            reset_image(image_to_delete)
+        image_to_reset = request.form.get("image_to_delete")
+        if image_to_reset is not None:
+            reset_image(image_to_reset)
             return redirect(request.url)
 
         file = request.files.get("file", None)
@@ -106,6 +110,7 @@ def upload():
             filename = secure_filename(file.filename)
             hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
             cat_id = int(request.form.get("cat_id"))
+            os.makedirs(ROOT_DIR / UPLOAD_PATH / ID2CAT[cat_id], exist_ok=True)
             file.save(UPLOAD_PATH / ID2CAT[cat_id] / hash_name)
 
             content = {"user": username, "cat_id": cat_id, "img_name": hash_name}
