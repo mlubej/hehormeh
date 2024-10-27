@@ -20,9 +20,11 @@ from .config import (
 from .utils import (
     allowed_file,
     check_votes,
+    delete_line,
     get_next_votable_category,
     get_uploaded_images,
     get_user_or_none,
+    read_data,
     write_line,
 )
 
@@ -88,6 +90,16 @@ def upload():
     """Display the upload page of the app."""
     username = get_user_or_none(request.remote_addr)
     if request.method == "POST":
+        reset_cat_id = request.form.get("reset_category")
+        # Image reset button was pressed
+        if reset_cat_id is not None:
+            # Delete entry from user_to_image.csv and remove image from uploads
+            cat = ID2CAT[int(reset_cat_id)]
+            df = read_data(USER_TO_IMAGE_FILE)
+            img_to_delete = df.loc[df["cat_id"] == int(reset_cat_id), "img_name"].values[0]
+            delete_line(USER_TO_IMAGE_FILE, "img_name", img_to_delete)
+            Path(f"{UPLOAD_PATH}/{cat}/{img_to_delete}").unlink()
+
         # check if the post request has the file part
         if "file" not in request.files:
             return redirect(request.url)
@@ -96,7 +108,6 @@ def upload():
         # empty file without a filename.
         if file.filename == "":
             return redirect(request.url)
-        # TODO: Remove older images of users in case he/she already uploaded an image for a give category
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             unique_name = uuid.uuid4().hex + Path(filename).suffix

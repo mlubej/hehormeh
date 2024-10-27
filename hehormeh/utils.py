@@ -70,6 +70,9 @@ def get_uploaded_images(username: str) -> dict:
         return dict()
 
     df = read_data(USER_TO_IMAGE_FILE)
+    if df.empty:
+        return dict()
+
     df = df[df["user"] == username]
     df["img_path"] = df.apply(lambda r: f"static/meme_files/{ID2CAT[r.cat_id]}/{r.img_name}", axis=1)
 
@@ -95,3 +98,11 @@ def write_line(content: dict, csv_file: str):
 
     new_data = pd.concat([existing_data, pd.DataFrame(content, index=[0])]).drop_duplicates(keep="last")
     new_data.to_csv(csv_file, index=False)
+
+
+def delete_line(csv_file: str, column_name: str, match_value):
+    """Delete line in csv_file in which column column_name contains value match_value."""
+    df = read_data(csv_file) if os.path.exists(csv_file) else abort(400, description=f"{csv_file} does not exist")
+
+    df = df[eval(f"df.{column_name}") != match_value]
+    df.to_csv(csv_file, index=False)
