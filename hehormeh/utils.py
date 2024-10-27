@@ -6,7 +6,14 @@ from pathlib import Path
 import pandas as pd
 from flask import abort
 
-from .config import ALLOWED_IMG_EXTENSIONS, ID2CAT, IP_TO_USER_FILE, USER_TO_IMAGE_FILE, VOTES_FILE
+from .config import (
+    ALLOWED_IMG_EXTENSIONS,
+    ID2CAT,
+    IP_TO_USER_FILE,
+    UPLOAD_PATH,
+    USER_TO_IMAGE_FILE,
+    VOTES_FILE,
+)
 
 
 def has_valid_extension(filename: str) -> bool:
@@ -71,7 +78,7 @@ def get_uploaded_images(username: str) -> dict:
 
     df = read_data(USER_TO_IMAGE_FILE)
     df = df[df["user"] == username]
-    df["img_path"] = df.apply(lambda r: f"static/meme_files/{ID2CAT[r.cat_id]}/{r.img_name}", axis=1)
+    df["img_path"] = df.apply(lambda r: f"{UPLOAD_PATH}/{ID2CAT[r.cat_id]}/{r.img_name}", axis=1)
 
     # Only take the last one in case a user uploaded more then one picture per category
     # TODO: make sure there is only one image per category

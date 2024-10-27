@@ -1,6 +1,7 @@
 """Main module for the hehormeh Flask app."""
 
 import hashlib
+import os
 from glob import glob
 from pathlib import Path
 
@@ -13,7 +14,7 @@ from .config import (
     HASH_SIZE,
     ID2CAT,
     IP_TO_USER_FILE,
-    STATIC_PATH,
+    ROOT_DIR,
     UPLOAD_PATH,
     USER_TO_IMAGE_FILE,
     VOTES_FILE,
@@ -27,7 +28,7 @@ from .utils import (
     write_line,
 )
 
-app = Flask(__name__, static_folder=STATIC_PATH)
+app = Flask(__name__, static_folder=ROOT_DIR / "static")
 app.config["UPLOAD_FOLDER"] = UPLOAD_PATH
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024**2  # Limit upload data to 10 MiB
 
@@ -79,7 +80,7 @@ def login():
 @app.route("/category_<int:cat_id>", methods=["GET"])
 def category(cat_id: int):
     """Display the images for a given category."""
-    images = [im for im in glob(f"static/meme_files/{ID2CAT[cat_id]}/*") if Path(im).suffix in ALLOWED_IMG_EXTENSIONS]
+    images = [im for im in glob(f"{UPLOAD_PATH}/{ID2CAT[cat_id]}/*") if Path(im).suffix in ALLOWED_IMG_EXTENSIONS]
     return render_template("category.html", cat=ID2CAT[cat_id], category_id=cat_id, images=images)
 
 
@@ -94,10 +95,11 @@ def upload():
 
         # TODO: Remove older images of users in case he/she already uploaded an image for a give category
         if file and has_valid_extension(file.filename):
-            filename = Path(secure_filename(file.filename))
-            hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + filename.suffix
+            filename = secure_filename(file.filename)
+            hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
             cat = request.form.get("category")
-            file.save(UPLOAD_PATH / cat / hash_name)
+            os.makedirs(ROOT_DIR / UPLOAD_PATH / cat, exist_ok=True)
+            file.save(ROOT_DIR / UPLOAD_PATH / cat / hash_name)
 
             content = {"user": username, "cat_id": CAT2ID[cat], "img_name": hash_name}
             write_line(content, USER_TO_IMAGE_FILE)
