@@ -100,9 +100,10 @@ def write_line(content: dict, csv_file: str):
     new_data.to_csv(csv_file, index=False)
 
 
-def delete_line(csv_file: str, column_name: str, match_value):
-    """Delete line in csv_file in which column column_name contains value match_value."""
-    df = read_data(csv_file) if os.path.exists(csv_file) else abort(400, description=f"{csv_file} does not exist")
-
-    df = df[eval(f"df.{column_name}") != match_value]
-    df.to_csv(csv_file, index=False)
+def delete_image(image_path: str):
+    """Delete image with given name."""
+    image_path = Path(image_path)
+    df = read_data(USER_TO_IMAGE_FILE)
+    df = df[df.img_name != image_path.name]
+    df.to_csv(USER_TO_IMAGE_FILE, index=False)
+    image_path.unlink()

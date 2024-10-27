@@ -22,7 +22,7 @@
         <img src="{{ images[cat_id] }}" width="400" />
         <form method=post >
           <input type=submit value="Reset">
-          <input type="hidden" name="reset_category" value="{{cat_id}}">
+          <input type="hidden" name="image_to_delete" value="{{ images[cat_id] }}">
         </form>
 
       {% else %}
