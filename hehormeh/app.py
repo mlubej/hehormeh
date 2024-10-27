@@ -14,7 +14,6 @@ from .config import (
     ID2CAT_ALL,
     IP_TO_USER_FILE,
     ROOT_DIR,
-    TRASH_CATEGORY,
     TRASH_ID,
     UPLOAD_PATH,
     USER_TO_IMAGE_FILE,
@@ -132,6 +131,4 @@ def upload():
 
     username = get_user_or_none(get_remote_addr(request))
     user_images = get_uploaded_images(username)
-    return render_template(
-        "upload.html", categories=ID2CAT_ALL, trash_cat_id=TRASH_ID, trash_cat=TRASH_CATEGORY, user_images=user_images
-    )
+    return render_template("upload.html", categories=ID2CAT_ALL, trash_cat_id=TRASH_ID, user_images=user_images)
