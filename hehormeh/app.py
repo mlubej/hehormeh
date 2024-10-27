@@ -33,10 +33,15 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_PATH
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024**2  # Limit upload data to 10 MiB
 
 
+def get_remote_addr(request):
+    """Use 'X-Test-Ip' header if present, otherwise fall back to `request.remote_addr`."""
+    return request.headers.get("X-Test-IP", request.remote_addr)
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     """Display the main page of the app."""
-    username = get_user_or_none(request.remote_addr)
+    username = get_user_or_none(get_remote_addr(request))
 
     if request.method == "POST":
         cat = request.form["category"]
@@ -70,7 +75,7 @@ def login():
         if not username:
             abort(400, description="Please enter a valid username!")
 
-        content = {"ip": request.remote_addr, "user": username}
+        content = {"ip": get_remote_addr(request), "user": username}
         write_line(content, IP_TO_USER_FILE)
         return redirect(url_for("index"))
 
@@ -87,7 +92,7 @@ def category(cat_id: int):
 @app.route("/upload", methods=["POST", "GET"])
 def upload():
     """Display the upload page of the app."""
-    username = get_user_or_none(request.remote_addr)
+    username = get_user_or_none(get_remote_addr(request))
     if request.method == "POST":
         file = request.files.get("file", None)
         if not file or file.filename == "":
