@@ -11,8 +11,11 @@ from werkzeug.utils import secure_filename
 from .config import (
     HASH_SIZE,
     ID2CAT,
+    ID2CAT_ALL,
     IP_TO_USER_FILE,
     ROOT_DIR,
+    TRASH_CATEGORY,
+    TRASH_ID,
     UPLOAD_PATH,
     USER_TO_IMAGE_FILE,
     VOTES_FILE,
@@ -108,8 +111,9 @@ def upload_handler(request):
         filename = secure_filename(file.filename)
         hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
         cat_id = int(request.form.get("cat_id"))
-        os.makedirs(ROOT_DIR / UPLOAD_PATH / ID2CAT[cat_id], exist_ok=True)
-        file.save(UPLOAD_PATH / ID2CAT[cat_id] / hash_name)
+
+        os.makedirs(ROOT_DIR / UPLOAD_PATH / ID2CAT_ALL[cat_id], exist_ok=True)
+        file.save(UPLOAD_PATH / ID2CAT_ALL[cat_id] / hash_name)
 
         content = {"user": username, "cat_id": cat_id, "img_name": hash_name}
         write_line(content, USER_TO_IMAGE_FILE)
@@ -123,5 +127,7 @@ def upload():
         return upload_handler(request)
 
     username = get_user_or_none(get_remote_addr(request))
-    uploaded_images = get_uploaded_images(username)
-    return render_template("upload.html", categories=ID2CAT, images=uploaded_images)
+    user_images = get_uploaded_images(username)
+    return render_template(
+        "upload.html", categories=ID2CAT_ALL, trash_cat_id=TRASH_ID, trash_cat=TRASH_CATEGORY, user_images=user_images
+    )
