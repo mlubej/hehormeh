@@ -1,6 +1,7 @@
 """Main module for the hehormeh Flask app."""
 
 import hashlib
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -85,7 +86,7 @@ def vote(cat_id: int):
     """Display the images for a given category."""
     df = pd.read_csv(USER_TO_IMAGE_FILE)
     df = df[df.cat_id == cat_id]
-    df["img_path"] = df.img_name.apply(lambda name: f"static/meme_files/{ID2CAT[cat_id]}/{name}")
+    df["img_path"] = df.img_name.apply(lambda name: UPLOAD_PATH / ID2CAT[cat_id] / name)
     img_and_author_info = {row.img_path: row.user == get_user_or_none(request.remote_addr) for _, row in df.iterrows()}
     return render_template("vote.html", cat_id=cat_id, cat=ID2CAT[cat_id], image_and_author_info=img_and_author_info)
 
@@ -109,6 +110,7 @@ def upload():
             filename = secure_filename(file.filename)
             hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
             cat_id = int(request.form.get("cat_id"))
+            os.makedirs(ROOT_DIR / UPLOAD_PATH / ID2CAT[cat_id], exist_ok=True)
             file.save(UPLOAD_PATH / ID2CAT[cat_id] / hash_name)
 
             content = {"user": username, "cat_id": cat_id, "img_name": hash_name}
