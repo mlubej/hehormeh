@@ -8,7 +8,6 @@ from flask import Flask, abort, redirect, render_template, request, url_for
 from werkzeug.utils import secure_filename
 
 from .config import (
-    CAT2ID,
     HASH_SIZE,
     ID2CAT,
     IP_TO_USER_FILE,
@@ -106,10 +105,10 @@ def upload():
         if file and has_valid_extension(file.filename):
             filename = secure_filename(file.filename)
             hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
-            cat = request.form.get("category")
-            file.save(UPLOAD_PATH / cat / hash_name)
+            cat_id = int(request.form.get("cat_id"))
+            file.save(UPLOAD_PATH / ID2CAT[cat_id] / hash_name)
 
-            content = {"user": username, "cat_id": CAT2ID[cat], "img_name": hash_name}
+            content = {"user": username, "cat_id": cat_id, "img_name": hash_name}
             write_line(content, USER_TO_IMAGE_FILE)
             return redirect(request.url)
 
