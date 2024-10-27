@@ -77,10 +77,10 @@ def get_uploaded_images(username: str) -> dict:
         return dict()
 
     df = read_data(USER_TO_IMAGE_FILE)
+    df = df[df["user"] == username]
     if df.empty:
         return dict()
 
-    df = df[df["user"] == username]
     df["img_path"] = df.apply(lambda r: f"{UPLOAD_PATH}/{ID2CAT[r.cat_id]}/{r.img_name}", axis=1)
 
     # Only take the last one in case a user uploaded more then one picture per category
