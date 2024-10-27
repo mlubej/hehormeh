@@ -14,9 +14,10 @@ USER_TO_IMAGE_FILE = DB_PATH / "user_to_image.csv"
 YEAR = os.environ["YEAR"]
 UPLOAD_PATH = Path("static") / YEAR
 
+TRASH_ID, TRASH_CATEGORY = -1, "trash"
 _CATEGORY_INFO = json.load(open(ROOT_DIR / "categories" / f"{YEAR}.json"))
-TRASH_CATEGORY = _CATEGORY_INFO["trash_category"]
-ID2CAT = {int(cat_id): cat for cat_id, cat in _CATEGORY_INFO["categories"].items()}
+ID2CAT = {int(cat_id): cat for cat_id, cat in _CATEGORY_INFO.items()}
+ID2CAT_ALL = {**ID2CAT, TRASH_ID: TRASH_CATEGORY}
 
 ALLOWED_IMG_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif"}
 HASH_SIZE = 8
