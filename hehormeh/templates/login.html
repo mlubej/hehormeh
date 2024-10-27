@@ -29,11 +29,6 @@
     <div class="container">
       <h2 class="user">Yo bre, kok ti je ime?</h2>
       <form action="{{ url_for('login') }}" method="POST">
-        {% if message is defined and message %}
-        <div class="alert alert-warning">
-          <strong> {{ message }} ????</strong>
-        </div>
-        {% endif %}
         <br />
         <label class="ok">User:</label>
         <input
@@ -46,13 +41,5 @@
         />
       </form>
     </div>
-
-    <!-- <h3 class="user">Or Log in as an existing user:</h3>
-
-    {% for user in users %}
-    <form action="/" method="POST">
-      <button user="no-user-defined-test"><div>{{user}}</div></button>
-    </form>
-    {% endfor %} -->
   </body>
 </html>

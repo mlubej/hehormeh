@@ -44,13 +44,14 @@ def get_remote_addr(request):
 def index():
     """Display the main page of the app."""
     username = get_user_or_none(get_remote_addr(request))
+    if not username:
+        return redirect(url_for("login"))
 
     if request.method == "POST":
         cat_id = request.form["cat_id"]
         funny_votes = {int(k.split("_")[1]): int(v) for k, v in request.form.items() if "funny" in k}
         cringe_votes = {int(k.split("_")[1]): int(v) for k, v in request.form.items() if "cringe" in k}
 
-        # check user votes
         if not check_votes(funny_votes, cringe_votes):
             abort(
                 400,
@@ -71,17 +72,20 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Display the login page of the app."""
-    # don't add duplicates to the csv file
+    username = get_user_or_none(get_remote_addr(request))
+    if username:
+        return redirect("/")
+
     if request.method == "POST":
-        username = request.form["user"]
-        if not username:
+        first_login = request.form["user"]
+        if not first_login:
             abort(400, description="Please enter a valid username!")
 
-        content = {"ip": get_remote_addr(request), "user": username}
+        content = {"ip": get_remote_addr(request), "user": first_login}
         write_line(content, IP_TO_USER_FILE)
-        return redirect(url_for("index"))
+        return redirect("/")
 
-    return render_template("login.html")
+    return render_template("login.html", username=username)
 
 
 @app.route("/vote_<int:cat_id>", methods=["GET"])
