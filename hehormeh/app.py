@@ -91,31 +91,37 @@ def vote(cat_id: int):
     return render_template("vote.html", cat_id=cat_id, cat=ID2CAT[cat_id], image_and_author_info=img_and_author_info)
 
 
+def upload_handler(request):
+    """Handle the normal category page."""
+    username = get_user_or_none(get_remote_addr(request))
+    image_to_reset = request.form.get("image_to_reset")
+
+    if image_to_reset:
+        reset_image(image_to_reset)
+        return redirect(request.url)
+
+    file = request.files.get("file", None)
+    if not file or file.filename == "":
+        return redirect(request.url)
+
+    if file and has_valid_extension(file.filename):
+        filename = secure_filename(file.filename)
+        hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
+        cat_id = int(request.form.get("cat_id"))
+        os.makedirs(ROOT_DIR / UPLOAD_PATH / ID2CAT[cat_id], exist_ok=True)
+        file.save(UPLOAD_PATH / ID2CAT[cat_id] / hash_name)
+
+        content = {"user": username, "cat_id": cat_id, "img_name": hash_name}
+        write_line(content, USER_TO_IMAGE_FILE)
+        return redirect(request.url)
+
+
 @app.route("/upload", methods=["POST", "GET"])
 def upload():
     """Display the upload page of the app."""
-    username = get_user_or_none(get_remote_addr(request))
     if request.method == "POST":
-        image_to_reset = request.form.get("image_to_delete")
-        if image_to_reset is not None:
-            reset_image(image_to_reset)
-            return redirect(request.url)
+        return upload_handler(request)
 
-        file = request.files.get("file", None)
-        if not file or file.filename == "":
-            return redirect(request.url)
-
-        # TODO: Remove older images of users in case he/she already uploaded an image for a give category
-        if file and has_valid_extension(file.filename):
-            filename = secure_filename(file.filename)
-            hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
-            cat_id = int(request.form.get("cat_id"))
-            os.makedirs(ROOT_DIR / UPLOAD_PATH / ID2CAT[cat_id], exist_ok=True)
-            file.save(UPLOAD_PATH / ID2CAT[cat_id] / hash_name)
-
-            content = {"user": username, "cat_id": cat_id, "img_name": hash_name}
-            write_line(content, USER_TO_IMAGE_FILE)
-            return redirect(request.url)
-
+    username = get_user_or_none(get_remote_addr(request))
     uploaded_images = get_uploaded_images(username)
     return render_template("upload.html", categories=ID2CAT, images=uploaded_images)
