@@ -3,10 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>FlaskBlog</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
-    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   </head>
 
   <body>
@@ -17,13 +14,15 @@
     <hr style="width: 100%; height: 5px; background-color: black" />
 
     <form action="/" method="post">
-      {% for image in images %}
+      {% for image, is_author in image_and_author_info.items() %}
       <div style="width: 100%; overflow: hidden">
         <div style="width: 50%; float: left"><img src="{{ image }}" /></div>
         <div style="margin-left: 60%">
+          {% if is_author %}
+          <div>Sori bre, daj 5ko nekam drugam.</div>
+          {% else %}
           <div>Funny</div>
-          <select name="'funny_{{ loop.index0 }}" >
-            <option value="-1" selected>I am the author</option>
+          <select name="'funny_{{ loop.index0 }}">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -31,8 +30,7 @@
             <option value="5">5</option>
           </select>
           <div>Cringe</div>
-          <select name="cringe_{{ loop.index0 }}" >
-            <option value="-1" selected>I am the author</option>
+          <select name="cringe_{{ loop.index0 }}">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -40,13 +38,14 @@
             <option value="5">5</option>
           </select>
         </div>
+        {% endif %}
       </div>
       <br />
       <hr style="width: 100%; height: 5px; background-color: black" />
       {% endfor %}
 
       <input type="submit" value="Submit values" />
-      <input type="hidden" name="category" value="{{cat}}" />
+      <input type="hidden" name="cat_id" value="{{cat_id}}" />
     </form>
   </body>
 </html>

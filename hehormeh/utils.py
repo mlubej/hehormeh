@@ -77,6 +77,9 @@ def get_uploaded_images(username: str) -> dict:
         return dict()
 
     df = read_data(USER_TO_IMAGE_FILE)
+    if df.empty:
+        return dict()
+
     df = df[df["user"] == username]
     df["img_path"] = df.apply(lambda r: f"{UPLOAD_PATH}/{ID2CAT[r.cat_id]}/{r.img_name}", axis=1)
 
@@ -102,3 +105,12 @@ def write_line(content: dict, csv_file: str):
 
     new_data = pd.concat([existing_data, pd.DataFrame(content, index=[0])]).drop_duplicates(keep="last")
     new_data.to_csv(csv_file, index=False)
+
+
+def reset_image(image_path: str):
+    """Reset image with given name."""
+    image_path = Path(image_path)
+    df = read_data(USER_TO_IMAGE_FILE)
+    df = df[df.img_name != image_path.name]
+    df.to_csv(USER_TO_IMAGE_FILE, index=False)
+    image_path.unlink()

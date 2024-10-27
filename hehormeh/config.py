@@ -17,7 +17,6 @@ UPLOAD_PATH = Path("static") / YEAR
 _CATEGORY_INFO = json.load(open(ROOT_DIR / "categories" / f"{YEAR}.json"))
 TRASH_CATEGORY = _CATEGORY_INFO["trash_category"]
 ID2CAT = {int(cat_id): cat for cat_id, cat in _CATEGORY_INFO["categories"].items()}
-CAT2ID = {cat: cat_id for cat_id, cat in ID2CAT.items()}
 
 ALLOWED_IMG_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif"}
 HASH_SIZE = 8

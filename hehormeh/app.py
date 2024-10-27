@@ -1,16 +1,13 @@
 """Main module for the hehormeh Flask app."""
 
 import hashlib
-import os
-from glob import glob
 from pathlib import Path
 
+import pandas as pd
 from flask import Flask, abort, redirect, render_template, request, url_for
 from werkzeug.utils import secure_filename
 
 from .config import (
-    ALLOWED_IMG_EXTENSIONS,
-    CAT2ID,
     HASH_SIZE,
     ID2CAT,
     IP_TO_USER_FILE,
@@ -25,6 +22,7 @@ from .utils import (
     get_uploaded_images,
     get_user_or_none,
     has_valid_extension,
+    reset_image,
     write_line,
 )
 
@@ -44,7 +42,7 @@ def index():
     username = get_user_or_none(get_remote_addr(request))
 
     if request.method == "POST":
-        cat = request.form["category"]
+        cat_id = request.form["cat_id"]
         funny_votes = {int(k.split("_")[1]): int(v) for k, v in request.form.items() if "funny" in k}
         cringe_votes = {int(k.split("_")[1]): int(v) for k, v in request.form.items() if "cringe" in k}
 
@@ -56,7 +54,7 @@ def index():
                 "and you should mark it for both categories!",
             )
 
-        kwargs = {"user": username, "cat_id": CAT2ID[cat]}
+        kwargs = {"user": username, "cat_id": cat_id}
         for image_id in funny_votes.keys():
             contents = {**kwargs, "img_id": image_id, "funny": funny_votes[image_id], "cringe": cringe_votes[image_id]}
             write_line(contents, VOTES_FILE)
@@ -82,11 +80,14 @@ def login():
     return render_template("login.html")
 
 
-@app.route("/category_<int:cat_id>", methods=["GET"])
-def category(cat_id: int):
+@app.route("/vote_<int:cat_id>", methods=["GET"])
+def vote(cat_id: int):
     """Display the images for a given category."""
-    images = [im for im in glob(f"{UPLOAD_PATH}/{ID2CAT[cat_id]}/*") if Path(im).suffix in ALLOWED_IMG_EXTENSIONS]
-    return render_template("category.html", cat=ID2CAT[cat_id], category_id=cat_id, images=images)
+    df = pd.read_csv(USER_TO_IMAGE_FILE)
+    df = df[df.cat_id == cat_id]
+    df["img_path"] = df.img_name.apply(lambda name: f"static/meme_files/{ID2CAT[cat_id]}/{name}")
+    img_and_author_info = {row.img_path: row.user == get_user_or_none(request.remote_addr) for _, row in df.iterrows()}
+    return render_template("vote.html", cat_id=cat_id, cat=ID2CAT[cat_id], image_and_author_info=img_and_author_info)
 
 
 @app.route("/upload", methods=["POST", "GET"])
@@ -94,6 +95,11 @@ def upload():
     """Display the upload page of the app."""
     username = get_user_or_none(get_remote_addr(request))
     if request.method == "POST":
+        image_to_reset = request.form.get("image_to_delete")
+        if image_to_reset is not None:
+            reset_image(image_to_reset)
+            return redirect(request.url)
+
         file = request.files.get("file", None)
         if not file or file.filename == "":
             return redirect(request.url)
@@ -102,11 +108,10 @@ def upload():
         if file and has_valid_extension(file.filename):
             filename = secure_filename(file.filename)
             hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
-            cat = request.form.get("category")
-            os.makedirs(ROOT_DIR / UPLOAD_PATH / cat, exist_ok=True)
-            file.save(ROOT_DIR / UPLOAD_PATH / cat / hash_name)
+            cat_id = int(request.form.get("cat_id"))
+            file.save(UPLOAD_PATH / ID2CAT[cat_id] / hash_name)
 
-            content = {"user": username, "cat_id": CAT2ID[cat], "img_name": hash_name}
+            content = {"user": username, "cat_id": cat_id, "img_name": hash_name}
             write_line(content, USER_TO_IMAGE_FILE)
             return redirect(request.url)
 
