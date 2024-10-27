@@ -16,7 +16,7 @@
     {% if user_images.get(cat_id) %}
     <img src="{{ user_images[cat_id][0] }}" width="400" />
     <form method="post">
-      <input type="submit" value="Reset" />
+      <input type="submit" value="Reset ↑" />
       <input type="hidden" name="image_to_reset" value="{{ user_images[cat_id][0] }}" />
     </form>
     {% else %}
@@ -41,7 +41,7 @@
     {% if user_images.get(trash_cat_id) %} {% for img in user_images[trash_cat_id]%}
     <img src="{{ img }}" width="400" />
     <form method="post">
-      <input type="submit" value="Reset" />
+      <input type="submit" value="Reset ↑" />
       <input type="hidden" name="image_to_reset" value="{{ img }}" />
     </form>
     {% endfor %} {% endif %}
