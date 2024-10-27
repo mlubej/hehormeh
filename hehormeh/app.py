@@ -77,11 +77,11 @@ def login():
         return redirect("/")
 
     if request.method == "POST":
-        first_login = request.form["user"]
-        if not first_login:
+        new_username = request.form["user"]
+        if not new_username:
             abort(400, description="Please enter a valid username!")
 
-        content = {"ip": get_remote_addr(request), "user": first_login}
+        content = {"ip": get_remote_addr(request), "user": new_username}
         write_line(content, IP_TO_USER_FILE)
         return redirect("/")
 
