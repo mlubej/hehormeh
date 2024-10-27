@@ -20,3 +20,4 @@ ID2CAT = {idx: cat.split("/")[-1] for idx, cat in ID2PATH.items()}
 CAT2ID = {cat: idx for idx, cat in ID2CAT.items()}
 
 ALLOWED_IMG_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif"}
+HASH_SIZE = 8
