@@ -98,7 +98,7 @@ def upload():
             df = read_data(USER_TO_IMAGE_FILE)
             img_to_delete = df.loc[df["cat_id"] == int(reset_cat_id), "img_name"].values[0]
             delete_line(USER_TO_IMAGE_FILE, "img_name", img_to_delete)
-            Path(f"{UPLOAD_PATH}/{cat}/{img_to_delete}").unlink()
+            Path(f"{UPLOAD_PATH}/{cat}/{img_to_delete}").remove()
 
         # check if the post request has the file part
         if "file" not in request.files:
