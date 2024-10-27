@@ -11,24 +11,22 @@
 
   <body>
     <a href="{{ url_for('index') }}">Go home</a>
-    <h1>Upload your memes for each category</h1>
+    <h1>Danes tvoji meme-ji uvidijo luč sveta</h1>
 
 
     {% for cat_id, cat in categories.items() %}
-        <h2> {{ cat }} </h2>
-
+      <h2> {{ cat }} </h2>
 
       {% if images.get(cat_id) %}
         <img src="{{ images[cat_id] }}" width="400" />
         <form method=post >
           <input type=submit value="Reset">
-          <input type="hidden" name="image_to_delete" value="{{ images[cat_id] }}">
+          <input type="hidden" name="image_to_reset" value="{{ images[cat_id] }}">
         </form>
-
       {% else %}
         <p>Nalozi sliko, frend</p>
         <form method=post enctype=multipart/form-data>
-            <input type=file name=file>
+          <input type=file name=file>
             <input type=submit value=Upload>
             <input type="hidden" name="cat_id" value="{{cat_id}}">
         </form>
@@ -36,6 +34,12 @@
 
     {% endfor %}
 
+    <hr style="width: 100%; height: 5px; background-color: black" />
 
+    <h2>Nalozi svoje smetje, omejitev ni</h2>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
   </body>
 </html
