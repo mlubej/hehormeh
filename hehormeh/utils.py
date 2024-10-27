@@ -9,7 +9,7 @@ from flask import abort
 from .config import ALLOWED_IMG_EXTENSIONS, ID2CAT, IP_TO_USER_FILE, USER_TO_IMAGE_FILE, VOTES_FILE
 
 
-def allowed_file(filename):
+def has_valid_extension(filename: str) -> bool:
     """Check if the file has an allowed extension."""
     return Path(filename).suffix.lower() in ALLOWED_IMG_EXTENSIONS
 

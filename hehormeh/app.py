@@ -1,6 +1,6 @@
 """Main module for the hehormeh Flask app."""
 
-import uuid
+import hashlib
 from glob import glob
 from pathlib import Path
 
@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 from .config import (
     ALLOWED_IMG_EXTENSIONS,
     CAT2ID,
+    HASH_SIZE,
     ID2CAT,
     IP_TO_USER_FILE,
     STATIC_PATH,
@@ -18,12 +19,12 @@ from .config import (
     VOTES_FILE,
 )
 from .utils import (
-    allowed_file,
     check_votes,
     delete_image,
     get_next_votable_category,
     get_uploaded_images,
     get_user_or_none,
+    has_valid_extension,
     write_line,
 )
 
@@ -80,7 +81,6 @@ def login():
 def category(cat_id: int):
     """Display the images for a given category."""
     images = [im for im in glob(f"static/meme_files/{ID2CAT[cat_id]}/*") if Path(im).suffix in ALLOWED_IMG_EXTENSIONS]
-
     return render_template("category.html", cat=ID2CAT[cat_id], category_id=cat_id, images=images)
 
 
@@ -95,21 +95,18 @@ def upload():
             # Delete entry from user_to_image.csv and remove image from uploads
             delete_image(image_to_delete)
 
-        # check if the post request has the file part
-        if "file" not in request.files:
+        file = request.files.get("file", None)
+        if not file or file.filename == "":
             return redirect(request.url)
-        file = request.files["file"]
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
-        if file.filename == "":
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            unique_name = uuid.uuid4().hex + Path(filename).suffix
-            cat = request.form.get("category")
-            file.save(UPLOAD_PATH / cat / unique_name)
 
-            content = {"user": username, "cat_id": CAT2ID[cat], "img_name": unique_name}
+        # TODO: Remove older images of users in case he/she already uploaded an image for a give category
+        if file and has_valid_extension(file.filename):
+            filename = secure_filename(file.filename)
+            hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
+            cat = request.form.get("category")
+            file.save(UPLOAD_PATH / cat / hash_name)
+
+            content = {"user": username, "cat_id": CAT2ID[cat], "img_name": hash_name}
             write_line(content, USER_TO_IMAGE_FILE)
             return redirect(request.url)
 
