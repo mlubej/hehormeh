@@ -17,16 +17,21 @@
     {% for cat_id, cat in categories.items() %}
         <h2> {{ cat }} </h2>
 
+
+      {% if images.get(cat_id) %}
+        <img src="{{ images[cat_id] }}" width="400" />
+        <form method=post >
+          <input type=submit value="Reset">
+          <input type="hidden" name="image_to_delete" value="{{ images[cat_id] }}">
+        </form>
+
+      {% else %}
+        <p>Nalozi sliko, frend</p>
         <form method=post enctype=multipart/form-data>
             <input type=file name=file>
             <input type=submit value=Upload>
             <input type="hidden" name="category" value="{{cat}}">
         </form>
-
-      {% if images.get(cat_id) %}
-          <img src="{{ images[cat_id] }}" width="400" />
-      {% else %}
-          <p>Nalozi sliko, frend</p>
       {% endif %}
 
     {% endfor %}

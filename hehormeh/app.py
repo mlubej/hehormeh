@@ -23,6 +23,7 @@ from .utils import (
     get_uploaded_images,
     get_user_or_none,
     has_valid_extension,
+    reset_image,
     write_line,
 )
 
@@ -90,6 +91,13 @@ def upload():
     """Display the upload page of the app."""
     username = get_user_or_none(request.remote_addr)
     if request.method == "POST":
+        image_to_delete = request.form.get("image_to_delete")
+        # Image reset button was pressed
+        if image_to_delete is not None:
+            # Delete entry from user_to_image.csv and remove image from uploads
+            reset_image(image_to_delete)
+            return redirect(request.url)
+
         file = request.files.get("file", None)
         if not file or file.filename == "":
             return redirect(request.url)
