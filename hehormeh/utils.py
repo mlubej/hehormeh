@@ -9,6 +9,7 @@ from flask import abort
 from .config import (
     ALLOWED_IMG_EXTENSIONS,
     ID2CAT,
+    ID2CAT_ALL,
     IP_TO_USER_FILE,
     NUM_OF_CATS,
     UPLOAD_PATH,
@@ -72,21 +73,18 @@ def get_next_votable_category() -> dict:
     return {next_cat_id: categories[next_cat_id]}
 
 
-def get_uploaded_images(username: str) -> dict:
+def get_uploaded_images(username: str) -> dict[str, list[str]]:
     """Return a dict with images uploaded by a user for each category."""
     if not os.path.exists(USER_TO_IMAGE_FILE):
         return dict()
 
     df = read_data(USER_TO_IMAGE_FILE)
+    df = df[df["user"] == username]
     if df.empty:
         return dict()
 
-    df = df[df["user"] == username]
-    df["img_path"] = df.apply(lambda r: f"{UPLOAD_PATH}/{ID2CAT[r.cat_id]}/{r.img_name}", axis=1)
-
-    # Only take the last one in case a user uploaded more then one picture per category
-    # TODO: make sure there is only one image per category
-    return df.groupby("cat_id")["img_path"].last().to_dict()
+    df["img_path"] = df.apply(lambda r: f"{UPLOAD_PATH}/{ID2CAT_ALL[r.cat_id]}/{r.img_name}", axis=1)
+    return df.groupby("cat_id")["img_path"].apply(list).to_dict()
 
 
 def get_uploaded_images_info() -> dict:

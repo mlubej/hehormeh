@@ -2,40 +2,48 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>FlaskBlog</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
-    />
+    <title>Daj ribu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   </head>
 
   <body>
     <a href="{{ url_for('index') }}">Go home</a>
-    <h1>Upload your memes for each category</h1>
+    <h1>Danes tvoji meme-ji uvidijo luč sveta</h1>
 
+    <!-- Handle normal categories -->
+    {% for cat_id, cat in categories.items() if cat_id >= 0 %}
+    <h2>{{ cat }}</h2>
+    {% if user_images.get(cat_id) %}
+    <img src="{{ user_images[cat_id][0] }}" width="400" />
+    <form method="post">
+      <input type="submit" value="Reset ↑" />
+      <input type="hidden" name="image_to_reset" value="{{ user_images[cat_id][0] }}" />
+    </form>
+    {% else %}
+    <p>Nalozi sliko, frend</p>
+    <form method="post" enctype="multipart/form-data">
+      <input type="file" name="file" />
+      <input type="submit" value="Upload" />
+      <input type="hidden" name="cat_id" value="{{cat_id}}" />
+    </form>
+    {% endif %} {% endfor %}
 
-    {% for cat_id, cat in categories.items() %}
-        <h2> {{ cat }} </h2>
+    <!-- Handle trash category -->
+    <hr style="width: 100%; height: 5px; background-color: black" />
 
+    <h2>Nalozi svoje smetje, omejitev ni</h2>
+    <form method="post" enctype="multipart/form-data">
+      <input type="file" name="file" />
+      <input type="submit" value="Upload" />
+      <input type="hidden" name="cat_id" value="{{trash_cat_id}}" />
+    </form>
 
-      {% if images.get(cat_id) %}
-        <img src="{{ images[cat_id] }}" width="400" />
-        <form method=post >
-          <input type=submit value="Reset">
-          <input type="hidden" name="image_to_delete" value="{{ images[cat_id] }}">
-        </form>
-
-      {% else %}
-        <p>Nalozi sliko, frend</p>
-        <form method=post enctype=multipart/form-data>
-            <input type=file name=file>
-            <input type=submit value=Upload>
-            <input type="hidden" name="cat_id" value="{{cat_id}}">
-        </form>
-      {% endif %}
-
-    {% endfor %}
-
-
+    {% if user_images.get(trash_cat_id) %} {% for img in user_images[trash_cat_id]%}
+    <img src="{{ img }}" width="400" />
+    <form method="post">
+      <input type="submit" value="Reset ↑" />
+      <input type="hidden" name="image_to_reset" value="{{ img }}" />
+    </form>
+    {% endfor %} {% endif %}
   </body>
-</html
+</html>
