@@ -10,6 +10,7 @@ from .config import (
     ALLOWED_IMG_EXTENSIONS,
     ID2CAT,
     IP_TO_USER_FILE,
+    NUM_OF_CATS,
     UPLOAD_PATH,
     USER_TO_IMAGE_FILE,
     VOTES_FILE,
@@ -86,6 +87,30 @@ def get_uploaded_images(username: str) -> dict:
     # Only take the last one in case a user uploaded more then one picture per category
     # TODO: make sure there is only one image per category
     return df.groupby("cat_id")["img_path"].last().to_dict()
+
+
+def get_uploaded_images_info() -> dict:
+    """Return info about which user uploaded memes for which category."""
+    if not os.path.exists(USER_TO_IMAGE_FILE):
+        return dict()
+
+    df = read_data(USER_TO_IMAGE_FILE)
+    if df.empty:
+        return dict()
+
+    def uploads_4_table(uploads):
+        """Restructure votes for a user in a format to be used on the admin page table."""
+        # Count and remove trash uploads
+        num_of_trash = uploads.count(-1)
+        list(filter(lambda a: a != -1, uploads))
+
+        # For each category: 0 - meme not uploaded, 1 - meme uploaded
+        # Last category is trash: instead of 0/1, add number of trash memes
+        uploads = [1 if i in uploads else 0 for i in range(NUM_OF_CATS)] + [num_of_trash]
+        return uploads
+
+    df = df.groupby("user")["cat_id"].apply(list)
+    return {user: uploads_4_table(uploads) for user, uploads in df.items()}
 
 
 def read_data(csv_file: str) -> pd.DataFrame:

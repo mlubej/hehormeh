@@ -15,6 +15,7 @@ YEAR = os.environ["YEAR"]
 UPLOAD_PATH = Path("static") / YEAR
 
 _CATEGORY_INFO = json.load(open(ROOT_DIR / "categories" / f"{YEAR}.json"))
+NUM_OF_CATS = len(_CATEGORY_INFO["categories"])
 TRASH_CATEGORY = _CATEGORY_INFO["trash_category"]
 ID2CAT = {int(cat_id): cat for cat_id, cat in _CATEGORY_INFO["categories"].items()}
 

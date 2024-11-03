@@ -26,6 +26,11 @@
         <br>
       {% endfor %}
 
+      {% if username=="admin"%}
+        <br><br>
+        Admin page: <a href="/admin">here</a>
+      {% endif %}
+
     {% endif %}
 
     <!-- <h2>{{ '%s - go to' % ('' if not user else 'Button') }}</h2> -->

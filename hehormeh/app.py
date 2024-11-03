@@ -13,6 +13,7 @@ from .config import (
     ID2CAT,
     IP_TO_USER_FILE,
     ROOT_DIR,
+    TRASH_CATEGORY,
     UPLOAD_PATH,
     USER_TO_IMAGE_FILE,
     VOTES_FILE,
@@ -21,6 +22,7 @@ from .utils import (
     check_votes,
     get_next_votable_category,
     get_uploaded_images,
+    get_uploaded_images_info,
     get_user_or_none,
     has_valid_extension,
     reset_image,
@@ -119,3 +121,11 @@ def upload():
 
     uploaded_images = get_uploaded_images(username)
     return render_template("upload.html", categories=ID2CAT, images=uploaded_images)
+
+
+@app.route("/admin")
+def admin():
+    """Display info about users and control staging."""
+    categories = [cat for id, cat in ID2CAT.items()] + [TRASH_CATEGORY]
+    user_uploads = get_uploaded_images_info()
+    return render_template("admin.html", categories=categories, user_uploads=user_uploads)

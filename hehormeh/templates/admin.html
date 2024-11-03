@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>FlaskBlog</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <style>
+    table, th, td {
+      border:1px solid black;
+    }
+  </style>
+
+  <body>
+    <h1>Hey Admin ;) </h1>
+
+    <h2>JazJaz-redelnica:</h2>
+    <table>
+      <tr>
+        <th>Users</th>
+        <th colspan="{{categories|length}}">categories</th>
+      </tr>
+      <tr>
+        <th></th>
+      {% for cat in categories %}
+        <th>{{cat}}</th>
+      {% endfor %}
+      </tr>
+
+      {% for user, uploads in user_uploads.items() %}
+        <tr>
+          <td>{{user}}</td>
+          {% for up in uploads[:-1] %}
+            <td>
+              {% if up %}
+                ✔️
+              {% else %}
+                ❌
+              {% endif %}
+            </td>
+          {% endfor %}
+          <td>
+            {{uploads[-1]}}
+          </td>
+        </tr>
+      {% endfor %}
+
+    </table>
+
+
+  </body>
+</html>
