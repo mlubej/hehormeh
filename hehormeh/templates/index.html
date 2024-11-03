@@ -16,11 +16,13 @@
     <h3>Go to category:</h3>
 
     {% for cat_id, cat in categories.items() %}
-    <a href="{{ url_for('vote', cat_id=cat_id) }}">{{cat}}</a>
-    <br />
-    {% endfor %} {% if username=="admin"%}
-    <br /><br />
-    Admin page: <a href="/admin">here</a>
-    {% endif %} {% endif %}
+      <a href="{{ url_for('vote', cat_id=cat_id) }}">{{cat}}</a>
+      <br />
+    {% endfor %}
+
+    {% if username=="admin"%}
+      <br /><br />
+      Admin page: <a href="/admin">here</a>
+    {% endif %}
   </body>
 </html>
