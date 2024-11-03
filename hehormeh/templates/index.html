@@ -2,32 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>FlaskBlog</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
-    />
+    <title>HehOrMeh</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   </head>
 
   <body>
-    <h1>Welcome to Heh or Meh</h1>
+    <h1>Welcome to Heh or Meh Land</h1>
 
-    {% if not username %}
-      Please log in to vote on memes. Click <a href="/login">here</a> to log in.
-    {% else %}
-      Logged in as: <b>{{ username }}</b>
-      <br>
-      Upload your memes <a href="/upload">here</a>
+    Logged in as: <b>{{ username }}</b>
+    <br />
+    Upload your memes <a href="/upload">here</a>
 
-      <h3>Go to category:</h3>
+    <h3>Go to category:</h3>
 
-      {% for cat_id, cat in categories.items() %}
-        <a href="{{ url_for('vote', cat_id=cat_id) }}">{{cat}}</a>
-        <br>
-      {% endfor %}
-
-    {% endif %}
-
-    <!-- <h2>{{ '%s - go to' % ('' if not user else 'Button') }}</h2> -->
+    {% for cat_id, cat in categories.items() %}
+    <a href="{{ url_for('vote', cat_id=cat_id) }}">{{cat}}</a>
+    <br />
+    {% endfor %}
   </body>
 </html>

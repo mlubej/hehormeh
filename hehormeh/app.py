@@ -11,8 +11,10 @@ from werkzeug.utils import secure_filename
 from .config import (
     HASH_SIZE,
     ID2CAT,
+    ID2CAT_ALL,
     IP_TO_USER_FILE,
     ROOT_DIR,
+    TRASH_ID,
     UPLOAD_PATH,
     USER_TO_IMAGE_FILE,
     VOTES_FILE,
@@ -41,13 +43,14 @@ def get_remote_addr(request):
 def index():
     """Display the main page of the app."""
     username = get_user_or_none(get_remote_addr(request))
+    if not username:
+        return redirect(url_for("login"))
 
     if request.method == "POST":
         cat_id = request.form["cat_id"]
         funny_votes = {int(k.split("_")[1]): int(v) for k, v in request.form.items() if "funny" in k}
         cringe_votes = {int(k.split("_")[1]): int(v) for k, v in request.form.items() if "cringe" in k}
 
-        # check user votes
         if not check_votes(funny_votes, cringe_votes):
             abort(
                 400,
@@ -68,17 +71,20 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Display the login page of the app."""
-    # don't add duplicates to the csv file
+    username = get_user_or_none(get_remote_addr(request))
+    if username:
+        return redirect("/")
+
     if request.method == "POST":
-        username = request.form["user"]
-        if not username:
+        new_username = request.form["user"]
+        if not new_username:
             abort(400, description="Please enter a valid username!")
 
-        content = {"ip": get_remote_addr(request), "user": username}
+        content = {"ip": get_remote_addr(request), "user": new_username}
         write_line(content, IP_TO_USER_FILE)
-        return redirect(url_for("index"))
+        return redirect("/")
 
-    return render_template("login.html")
+    return render_template("login.html", username=username)
 
 
 @app.route("/vote_<int:cat_id>", methods=["GET"])
@@ -91,31 +97,38 @@ def vote(cat_id: int):
     return render_template("vote.html", cat_id=cat_id, cat=ID2CAT[cat_id], image_and_author_info=img_and_author_info)
 
 
+def upload_handler(request):
+    """Handle the normal category page."""
+    username = get_user_or_none(get_remote_addr(request))
+    image_to_reset = request.form.get("image_to_reset")
+
+    if image_to_reset:
+        reset_image(image_to_reset)
+        return redirect(request.url)
+
+    file = request.files.get("file", None)
+    if not file or file.filename == "":
+        return redirect(request.url)
+
+    if file and has_valid_extension(file.filename):
+        filename = secure_filename(file.filename)
+        hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
+        cat_id = int(request.form.get("cat_id"))
+
+        os.makedirs(ROOT_DIR / UPLOAD_PATH / ID2CAT_ALL[cat_id], exist_ok=True)
+        file.save(UPLOAD_PATH / ID2CAT_ALL[cat_id] / hash_name)
+
+        content = {"user": username, "cat_id": cat_id, "img_name": hash_name}
+        write_line(content, USER_TO_IMAGE_FILE)
+        return redirect(request.url)
+
+
 @app.route("/upload", methods=["POST", "GET"])
 def upload():
     """Display the upload page of the app."""
-    username = get_user_or_none(get_remote_addr(request))
     if request.method == "POST":
-        image_to_reset = request.form.get("image_to_delete")
-        if image_to_reset is not None:
-            reset_image(image_to_reset)
-            return redirect(request.url)
+        return upload_handler(request)
 
-        file = request.files.get("file", None)
-        if not file or file.filename == "":
-            return redirect(request.url)
-
-        # TODO: Remove older images of users in case he/she already uploaded an image for a give category
-        if file and has_valid_extension(file.filename):
-            filename = secure_filename(file.filename)
-            hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
-            cat_id = int(request.form.get("cat_id"))
-            os.makedirs(ROOT_DIR / UPLOAD_PATH / ID2CAT[cat_id], exist_ok=True)
-            file.save(UPLOAD_PATH / ID2CAT[cat_id] / hash_name)
-
-            content = {"user": username, "cat_id": cat_id, "img_name": hash_name}
-            write_line(content, USER_TO_IMAGE_FILE)
-            return redirect(request.url)
-
-    uploaded_images = get_uploaded_images(username)
-    return render_template("upload.html", categories=ID2CAT, images=uploaded_images)
+    username = get_user_or_none(get_remote_addr(request))
+    user_images = get_uploaded_images(username)
+    return render_template("upload.html", categories=ID2CAT_ALL, trash_cat_id=TRASH_ID, user_images=user_images)
