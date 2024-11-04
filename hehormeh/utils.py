@@ -11,7 +11,6 @@ from .config import (
     ID2CAT,
     ID2CAT_ALL,
     IP_TO_USER_FILE,
-    NUM_OF_CATS,
     UPLOAD_PATH,
     USER_TO_IMAGE_FILE,
     VOTES_FILE,
@@ -73,14 +72,25 @@ def get_next_votable_category() -> dict:
     return {next_cat_id: categories[next_cat_id]}
 
 
-def get_uploaded_images(username: str) -> dict[str, list[str]]:
-    """Return a dict with images uploaded by a user for each category."""
+def read_user_image_dataframe(username: str | None = None) -> pd.DataFrame | None:
+    """Read the user2image dataframe."""
     if not os.path.exists(USER_TO_IMAGE_FILE):
-        return dict()
+        return None
 
     df = read_data(USER_TO_IMAGE_FILE)
-    df = df[df["user"] == username]
+    if username is not None:
+        df = df[df["user"] == username]
+
     if df.empty:
+        return None
+
+    return df
+
+
+def get_uploaded_images(username: str) -> dict[str, list[str]]:
+    """Return a dict with images uploaded by a user for each category."""
+    df = read_user_image_dataframe(username)
+    if df is None:
         return dict()
 
     df["img_path"] = df.apply(lambda r: f"{UPLOAD_PATH}/{ID2CAT_ALL[r.cat_id]}/{r.img_name}", axis=1)
@@ -89,26 +99,16 @@ def get_uploaded_images(username: str) -> dict[str, list[str]]:
 
 def get_uploaded_images_info() -> dict:
     """Return info about which user uploaded memes for which category."""
-    if not os.path.exists(USER_TO_IMAGE_FILE):
+    df = read_user_image_dataframe()
+    if df is None:
         return dict()
 
-    df = read_data(USER_TO_IMAGE_FILE)
-    if df.empty:
-        return dict()
+    def category_counts(user_df) -> dict[str, int]:
+        """Get category counts for a given user-filtered dataframe."""
+        cat_counts = user_df.groupby("cat_id")["img_name"].count().to_dict()
+        return {cat: cat_counts.get(cat, 0) for cat in ID2CAT_ALL.keys()}
 
-    def uploads_4_table(uploads):
-        """Restructure votes for a user in a format to be used on the admin page table."""
-        # Count and remove trash uploads
-        num_of_trash = uploads.count(-1)
-        list(filter(lambda a: a != -1, uploads))
-
-        # For each category: 0 - meme not uploaded, 1 - meme uploaded
-        # Last category is trash: instead of 0/1, add number of trash memes
-        uploads = [1 if i in uploads else 0 for i in range(NUM_OF_CATS)] + [num_of_trash]
-        return uploads
-
-    df = df.groupby("user")["cat_id"].apply(list)
-    return {user: uploads_4_table(uploads) for user, uploads in df.items()}
+    return df.groupby("user").apply(category_counts).to_dict()
 
 
 def read_data(csv_file: str) -> pd.DataFrame:

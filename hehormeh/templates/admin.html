@@ -25,7 +25,7 @@
       </tr>
       <tr>
         <th></th>
-      {% for cat in categories %}
+      {% for cat in categories.values() %}
         <th>{{cat}}</th>
       {% endfor %}
       </tr>
@@ -33,23 +33,19 @@
       {% for user, uploads in user_uploads.items() %}
         <tr>
           <td>{{user}}</td>
-          {% for up in uploads[:-1] %}
+          {% for cat_id in categories.keys() %}
             <td>
-              {% if up %}
-                ✔️
-              {% else %}
+              {% if uploads[cat_id] == 1 %}
+                ️✅
+              {% elif uploads[cat_id] == 0 %}
                 ❌
+              {% else %}
+                {{uploads[cat_id]}}
               {% endif %}
             </td>
           {% endfor %}
-          <td>
-            {{uploads[-1]}}
-          </td>
         </tr>
       {% endfor %}
-
     </table>
-
-
   </body>
 </html>

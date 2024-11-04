@@ -14,7 +14,6 @@ from .config import (
     ID2CAT_ALL,
     IP_TO_USER_FILE,
     ROOT_DIR,
-    TRASH_CATEGORY,
     TRASH_ID,
     UPLOAD_PATH,
     USER_TO_IMAGE_FILE,
@@ -139,6 +138,5 @@ def upload():
 @app.route("/admin")
 def admin():
     """Display info about users and control staging."""
-    categories = [cat for id, cat in ID2CAT.items()] + [TRASH_CATEGORY]
-    user_uploads = get_uploaded_images_info()
-    return render_template("admin.html", categories=categories, user_uploads=user_uploads)
+    # TODO: add IPs of users
+    return render_template("admin.html", categories=ID2CAT_ALL, user_uploads=get_uploaded_images_info())
