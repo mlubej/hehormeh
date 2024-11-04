@@ -26,6 +26,7 @@ from .utils import (
     get_uploaded_images_info,
     get_user_or_none,
     has_valid_extension,
+    is_host_admin,
     reset_image,
     write_line,
 )
@@ -66,7 +67,10 @@ def index():
 
         return redirect("/")
 
-    return render_template("index.html", username=username, categories=get_next_votable_category())
+    address = get_remote_addr(request)
+    return render_template(
+        "index.html", username=username, categories=get_next_votable_category(), is_host_admin=is_host_admin(address)
+    )
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -135,8 +139,15 @@ def upload():
     return render_template("upload.html", categories=ID2CAT_ALL, trash_cat_id=TRASH_ID, user_images=user_images)
 
 
-@app.route("/admin")
+@app.route("/admin", methods=["GET"])
 def admin():
     """Display info about users and control staging."""
     # TODO: add IPs of users
-    return render_template("admin.html", categories=ID2CAT_ALL, user_uploads=get_uploaded_images_info())
+
+    address = get_remote_addr(request)
+    if not is_host_admin(address):
+        return redirect("/")
+
+    return render_template(
+        "admin.html", categories=ID2CAT_ALL, user_uploads=get_uploaded_images_info(), trash_cat_id=TRASH_ID
+    )

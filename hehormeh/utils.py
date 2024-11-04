@@ -72,6 +72,21 @@ def get_next_votable_category() -> dict:
     return {next_cat_id: categories[next_cat_id]}
 
 
+def get_user_ip(username: str | None = None) -> pd.DataFrame | None:
+    """Read the user2image dataframe."""
+    if not os.path.exists(USER_TO_IMAGE_FILE):
+        return None
+
+    df = read_data(USER_TO_IMAGE_FILE)
+    if username is not None:
+        df = df[df["user"] == username]
+
+    if df.empty:
+        return None
+
+    return df
+
+
 def read_user_image_dataframe(username: str | None = None) -> pd.DataFrame | None:
     """Read the user2image dataframe."""
     if not os.path.exists(USER_TO_IMAGE_FILE):
@@ -128,6 +143,11 @@ def write_line(content: dict, csv_file: str):
 
     new_data = pd.concat([existing_data, pd.DataFrame(content, index=[0])]).drop_duplicates(keep="last")
     new_data.to_csv(csv_file, index=False)
+
+
+def is_host_admin(address: str):
+    """Return whether the IP address belongs to the host."""
+    return address == "127.0.0.1" or address == "0.0.0.0" or address == "localhost"
 
 
 def reset_image(image_path: str):

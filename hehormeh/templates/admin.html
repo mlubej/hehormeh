@@ -35,12 +35,12 @@
           <td>{{user}}</td>
           {% for cat_id in categories.keys() %}
             <td>
-              {% if uploads[cat_id] == 1 %}
-                ️✅
-              {% elif uploads[cat_id] == 0 %}
-                ❌
-              {% else %}
+              {% if cat_id == trash_cat_id%}
                 {{uploads[cat_id]}}
+              {% elif uploads[cat_id] == 1 %}
+                ️✅
+              {% else %}
+                ❌
               {% endif %}
             </td>
           {% endfor %}
