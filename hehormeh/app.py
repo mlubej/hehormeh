@@ -4,11 +4,11 @@ import hashlib
 import os
 from pathlib import Path
 
-import pandas as pd
 from flask import Flask, abort, redirect, render_template, request, url_for
 from werkzeug.utils import secure_filename
 
 from .config import (
+    ADMIN_CONTROL_FILE,
     HASH_SIZE,
     ID2CAT,
     ID2CAT_ALL,
@@ -20,13 +20,14 @@ from .config import (
     VOTES_FILE,
 )
 from .utils import (
-    check_votes,
-    get_next_votable_category,
+    get_next_votable_category_id,
     get_uploaded_images,
     get_uploaded_images_info,
     get_user_or_none,
     has_valid_extension,
     is_host_admin,
+    is_voting_valid,
+    read_user_image_dataframe,
     reset_image,
     write_line,
 )
@@ -50,26 +51,23 @@ def index():
 
     if request.method == "POST":
         cat_id = request.form["cat_id"]
-        funny_votes = {int(k.split("_")[1]): int(v) for k, v in request.form.items() if "funny" in k}
-        cringe_votes = {int(k.split("_")[1]): int(v) for k, v in request.form.items() if "cringe" in k}
+        img_names = {int(k.split("_")[-1]): v for k, v in request.form.items() if "img_name" in k}
+        funny_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "funny" in k}
+        cringe_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "cringe" in k}
 
-        if not check_votes(funny_votes, cringe_votes):
-            abort(
-                400,
-                description="You have not voted correctly! You can only be an author of one image per category, "
-                "and you should mark it for both categories!",
-            )
+        if not is_voting_valid(funny_votes, cringe_votes):
+            abort(400, description="Make sure you vote for all the memes!")
 
         kwargs = {"user": username, "cat_id": cat_id}
-        for image_id in funny_votes.keys():
-            contents = {**kwargs, "img_id": image_id, "funny": funny_votes[image_id], "cringe": cringe_votes[image_id]}
-            write_line(contents, VOTES_FILE)
+        for idx, img_name in img_names.items():
+            contents = {**kwargs, "img_name": img_name, "funny": funny_votes[idx], "cringe": cringe_votes[idx]}
+            write_line(contents, VOTES_FILE, check_cols=["user", "cat_id", "img_name"])
 
         return redirect("/")
 
     address = get_remote_addr(request)
     return render_template(
-        "index.html", username=username, categories=get_next_votable_category(), is_host_admin=is_host_admin(address)
+        "index.html", username=username, categories=get_next_votable_category_id(), is_host_admin=is_host_admin(address)
     )
 
 
@@ -92,13 +90,19 @@ def login():
     return render_template("login.html", username=username)
 
 
-@app.route("/vote_<int:cat_id>", methods=["GET"])
-def vote(cat_id: int):
+@app.route("/vote", methods=["GET"])
+def vote():
     """Display the images for a given category."""
-    df = pd.read_csv(USER_TO_IMAGE_FILE)
+    cat_id = get_next_votable_category_id()
+    # if voting not started yet:
+    #     return abort(403, description="Voting not yet possible!")
+
+    df = read_user_image_dataframe()
     df = df[df.cat_id == cat_id]
     df["img_path"] = df.img_name.apply(lambda name: UPLOAD_PATH / ID2CAT[cat_id] / name)
-    img_and_author_info = {row.img_path: row.user == get_user_or_none(request.remote_addr) for _, row in df.iterrows()}
+    img_and_author_info = {
+        str(row.img_path): row.user == get_user_or_none(request.remote_addr) for _, row in df.iterrows()
+    }
     return render_template("vote.html", cat_id=cat_id, cat=ID2CAT[cat_id], image_and_author_info=img_and_author_info)
 
 
@@ -139,7 +143,7 @@ def upload():
     return render_template("upload.html", categories=ID2CAT_ALL, trash_cat_id=TRASH_ID, user_images=user_images)
 
 
-@app.route("/admin", methods=["GET"])
+@app.route("/admin", methods=["POST", "GET"])
 def admin():
     """Display info about users and control staging."""
     # TODO: add IPs of users
@@ -148,6 +152,16 @@ def admin():
     if not is_host_admin(address):
         return redirect("/")
 
+    if request.method == "POST":
+        voting_state = request.form.get("voting_state")
+        print(voting_state)
+        write_line({voting_state: voting_state}, ADMIN_CONTROL_FILE)
+        return redirect(request.url)
+
     return render_template(
-        "admin.html", categories=ID2CAT_ALL, user_uploads=get_uploaded_images_info(), trash_cat_id=TRASH_ID
+        "admin.html",
+        categories=ID2CAT_ALL,
+        user_uploads=get_uploaded_images_info(),
+        trash_cat_id=TRASH_ID,
+        current_cat=ID2CAT[get_next_votable_category_id()],
     )

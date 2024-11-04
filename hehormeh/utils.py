@@ -17,6 +17,12 @@ from .config import (
 )
 
 
+def is_host_admin(address: str):
+    """Return whether the IP address belongs to the host."""
+    # return address == "127.0.0.1" or address == "0.0.0.0" or address == "localhost"
+    return True
+
+
 def has_valid_extension(filename: str) -> bool:
     """Check if the file has an allowed extension."""
     return Path(filename).suffix.lower() in ALLOWED_IMG_EXTENSIONS
@@ -27,64 +33,51 @@ def get_user_or_none(ip: str) -> str | None:
     if not os.path.exists(IP_TO_USER_FILE):
         return None
 
-    mapping = dict(pd.read_csv(IP_TO_USER_FILE, names=["ip", "user"]).values)
+    mapping = dict(pd.read_csv(IP_TO_USER_FILE, header=0).values)
     return mapping.get(ip, None)
 
 
-def check_votes(funny_votes, cringe_votes):
+def is_voting_valid(funny_votes, cringe_votes):
     """Check if the user has voted correctly.
 
     The user can only be the author of one image per category and should mark it for both categories.
     """
-    author_votes_funny = [k for k, v in funny_votes.items() if v == -1]
-    author_votes_cringe = [k for k, v in cringe_votes.items() if v == -1]
-    if len(author_votes_funny) != 1 or len(author_votes_cringe) != 1:
-        return False
+    score_values = set(funny_votes.values()) | set(cringe_votes.values())
+    return all(v != -1 for v in score_values)
 
-    if author_votes_funny[0] != author_votes_cringe[0]:
+
+def category_voting_complete(category_id: int) -> bool:
+    if not os.path.exists(VOTES_FILE):
         return False
 
     return True
 
 
-def has_everyone_voted(category_id: int) -> bool:
-    """Check if everyone has voted for a given category."""
-    if not os.path.exists(IP_TO_USER_FILE) or not os.path.exists(VOTES_FILE):
-        return False
+# def meme_voting_finished(img_name: str) -> bool:
+#     """Check if everyone has voted for a given category."""
+#     upload_df = read_user_image_dataframe()
+#     if upload_df is None:
+#         return False
 
-    all_users = pd.read_csv(IP_TO_USER_FILE, names=["ip", "user"]).user.nunique()
+#     # if not os.path.exists(IP_TO_USER_FILE) or not os.path.exists(VOTES_FILE):
+#     #     return False
 
-    vote_cols = ["user", "cat_id", "meme_id", "funny", "cringe"]
-    all_votes = pd.read_csv(VOTES_FILE, names=vote_cols)[["user", "cat_id"]].drop_duplicates()
+#     # user_info_df = pd.read_csv(IP_TO_USER_FILE, header=0)
+#     # user_info_df = user_info_df[~user_info_df.ip.apply(is_host_admin)]  # remove host from the list
+#     # n_eligible_users = user_info_df.user.nunique()
 
-    n_users_category = all_votes[all_votes["cat_id"] == category_id].user.nunique()
-    return all_users == n_users_category
+#     # votes = pd.read_csv(VOTES_FILE, header=0)[["user", "cat_id"]].drop_duplicates()
+#     # n_voting_users = votes[votes.cat_id == category_id].user.nunique()
+#     # return n_voting_users == n_eligible_users
 
 
-def get_next_votable_category() -> dict:
-    """Return the next category that the user can vote for."""
-    categories = {cat_id: cat for cat_id, cat in ID2CAT.items() if not has_everyone_voted(cat_id)}
-
+def get_next_votable_category_id() -> int:
+    """Return the next category ID that the user can vote for."""
+    categories = {cat_id: cat for cat_id, cat in ID2CAT.items() if not category_voting_complete(cat_id)}
     if len(categories) == 0:
-        return {}
+        return list(ID2CAT.keys())[0]
 
-    next_cat_id = sorted(list(categories.keys()))[0]
-    return {next_cat_id: categories[next_cat_id]}
-
-
-def get_user_ip(username: str | None = None) -> pd.DataFrame | None:
-    """Read the user2image dataframe."""
-    if not os.path.exists(USER_TO_IMAGE_FILE):
-        return None
-
-    df = read_data(USER_TO_IMAGE_FILE)
-    if username is not None:
-        df = df[df["user"] == username]
-
-    if df.empty:
-        return None
-
-    return df
+    return list(categories.keys())[0]
 
 
 def read_user_image_dataframe(username: str | None = None) -> pd.DataFrame | None:
@@ -131,7 +124,7 @@ def read_data(csv_file: str) -> pd.DataFrame:
     return pd.read_csv(csv_file, header=0)
 
 
-def write_line(content: dict, csv_file: str):
+def write_line(content: dict, csv_file: str, check_cols: list[str] | None = None):
     """Write a line to a file. If the line already exists, the line will be overwritten."""
     os.makedirs(os.path.dirname(csv_file), exist_ok=True)
 
@@ -141,13 +134,14 @@ def write_line(content: dict, csv_file: str):
     if not existing_data.empty and set(columns) != set(existing_data.columns):
         abort(400, description="Content does not match existing data.")
 
-    new_data = pd.concat([existing_data, pd.DataFrame(content, index=[0])]).drop_duplicates(keep="last")
+    print("existing_data:", existing_data)
+    print("content:", pd.DataFrame(content, index=[0]))
+
+    # TODO: fix this
+    new_data = pd.concat([existing_data, pd.DataFrame(content, index=[0])]).drop_duplicates(
+        subset=check_cols, keep="last"
+    )
     new_data.to_csv(csv_file, index=False)
-
-
-def is_host_admin(address: str):
-    """Return whether the IP address belongs to the host."""
-    return address == "127.0.0.1" or address == "0.0.0.0" or address == "localhost"
 
 
 def reset_image(image_path: str):

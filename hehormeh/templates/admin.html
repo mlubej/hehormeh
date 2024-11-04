@@ -47,5 +47,16 @@
         </tr>
       {% endfor %}
     </table>
+
+<h2>Voting control:</h2>
+<p>Current cat: <b>{{current_cat}}</b></p>
+
+<form method="POST">
+    <input type="submit" name="voting_state" value="Allow voting">
+    <input type="submit" name="voting_state" value="Freeze voting">
+    <p>Currently: TODO</p>
+</form>
+
+
   </body>
 </html>

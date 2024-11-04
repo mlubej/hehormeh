@@ -10,6 +10,7 @@ DB_PATH = ROOT_DIR / "db"
 VOTES_FILE = DB_PATH / "votes.csv"
 IP_TO_USER_FILE = DB_PATH / "ip_to_user.csv"
 USER_TO_IMAGE_FILE = DB_PATH / "user_to_image.csv"
+ADMIN_CONTROL_FILE = DB_PATH / "admin_control.csv"
 
 YEAR = os.environ["YEAR"]
 UPLOAD_PATH = Path("static") / YEAR

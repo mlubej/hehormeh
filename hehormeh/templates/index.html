@@ -15,10 +15,8 @@
 
     <h3>Go to category:</h3>
 
-    {% for cat_id, cat in categories.items() %}
-      <a href="{{ url_for('vote', cat_id=cat_id) }}">{{cat}}</a>
-      <br />
-    {% endfor %}
+    <a href="/vote">Vote here</a>
+    <br />
 
     {% if is_host_admin %}
       <br /><br />
