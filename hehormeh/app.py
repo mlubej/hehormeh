@@ -13,6 +13,7 @@ from .config import (
     ID2CAT,
     ID2CAT_ALL,
     IP_TO_USER_FILE,
+    QR_CODE_IMAGE_FILE_NAME,
     ROOT_DIR,
     TRASH_ID,
     UPLOAD_PATH,
@@ -21,6 +22,7 @@ from .config import (
 )
 from .utils import (
     check_votes,
+    generate_server_link_QR_code,
     get_next_votable_category,
     get_uploaded_images,
     get_uploaded_images_info,
@@ -139,9 +141,12 @@ def upload():
     return render_template("upload.html", categories=ID2CAT_ALL, trash_cat_id=TRASH_ID, user_images=user_images)
 
 
-@app.route("/admin", methods=["GET"])
+@app.route("/admin", methods=["POST", "GET"])
 def admin():
     """Display info about users and control staging."""
+    if request.method == "POST":
+        generate_server_link_QR_code(request)
+        return redirect(request.url)
     # TODO: add IPs of users
 
     address = get_remote_addr(request)
@@ -149,5 +154,15 @@ def admin():
         return redirect("/")
 
     return render_template(
-        "admin.html", categories=ID2CAT_ALL, user_uploads=get_uploaded_images_info(), trash_cat_id=TRASH_ID
+        "admin.html",
+        categories=ID2CAT_ALL,
+        user_uploads=get_uploaded_images_info(),
+        trash_cat_id=TRASH_ID,
+        qr_code_img=f"static/{QR_CODE_IMAGE_FILE_NAME}",
     )
+
+
+@app.route("/qr")
+def qr():
+    """Display QR code to connect to the server."""
+    return render_template("qr.html", qr_code_img=f"static/{QR_CODE_IMAGE_FILE_NAME}")

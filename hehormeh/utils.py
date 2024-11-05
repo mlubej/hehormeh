@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 
 import pandas as pd
+import qrcode
+import qrcode.image.svg
 from flask import abort
 
 from .config import (
@@ -11,6 +13,7 @@ from .config import (
     ID2CAT,
     ID2CAT_ALL,
     IP_TO_USER_FILE,
+    QR_CODE_IMAGE_SAVE_PATH,
     UPLOAD_PATH,
     USER_TO_IMAGE_FILE,
     VOTES_FILE,
@@ -157,3 +160,11 @@ def reset_image(image_path: str):
     df = df[df.img_name != image_path.name]
     df.to_csv(USER_TO_IMAGE_FILE, index=False)
     image_path.unlink()
+
+
+def generate_server_link_QR_code(request):
+    """Generate QR code from the server link."""
+    url = f"http://{request.headers.get('Host')}"
+    img = qrcode.make(url, image_factory=qrcode.image.svg.SvgImage)
+    with open(QR_CODE_IMAGE_SAVE_PATH, "wb") as qr:
+        img.save(qr)

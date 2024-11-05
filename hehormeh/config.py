@@ -11,6 +11,9 @@ VOTES_FILE = DB_PATH / "votes.csv"
 IP_TO_USER_FILE = DB_PATH / "ip_to_user.csv"
 USER_TO_IMAGE_FILE = DB_PATH / "user_to_image.csv"
 
+QR_CODE_IMAGE_FILE_NAME = "qr_code.svg"
+QR_CODE_IMAGE_SAVE_PATH = ROOT_DIR / "static" / QR_CODE_IMAGE_FILE_NAME
+
 YEAR = os.environ["YEAR"]
 UPLOAD_PATH = Path("static") / YEAR
 
