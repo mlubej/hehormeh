@@ -29,7 +29,7 @@ from .utils import (
     is_voting_valid,
     read_user_image_dataframe,
     reset_image,
-    write_line,
+    write_data,
 )
 
 app = Flask(__name__, static_folder=ROOT_DIR / "static")
@@ -50,7 +50,7 @@ def index():
         return redirect(url_for("login"))
 
     if request.method == "POST":
-        cat_id = request.form["cat_id"]
+        cat_id = int(request.form["cat_id"])
         img_names = {int(k.split("_")[-1]): v for k, v in request.form.items() if "img_name" in k}
         funny_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "funny" in k}
         cringe_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "cringe" in k}
@@ -58,11 +58,12 @@ def index():
         if not is_voting_valid(funny_votes, cringe_votes):
             abort(400, description="Make sure you vote for all the memes!")
 
+        contents = []
         kwargs = {"user": username, "cat_id": cat_id}
         for idx, img_name in img_names.items():
-            contents = {**kwargs, "img_name": img_name, "funny": funny_votes[idx], "cringe": cringe_votes[idx]}
-            write_line(contents, VOTES_FILE, check_cols=["user", "cat_id", "img_name"])
+            contents.append({**kwargs, "img_name": img_name, "funny": funny_votes[idx], "cringe": cringe_votes[idx]})
 
+        write_data(contents, VOTES_FILE, check_cols=["user", "cat_id", "img_name"])
         return redirect("/")
 
     address = get_remote_addr(request)
@@ -83,8 +84,8 @@ def login():
         if not new_username:
             abort(400, description="Please enter a valid username!")
 
-        content = {"ip": get_remote_addr(request), "user": new_username}
-        write_line(content, IP_TO_USER_FILE)
+        content = [{"ip": get_remote_addr(request), "user": new_username}]
+        write_data(content, IP_TO_USER_FILE)
         return redirect("/")
 
     return render_template("login.html", username=username)
@@ -127,8 +128,8 @@ def upload_handler(request):
         os.makedirs(ROOT_DIR / UPLOAD_PATH / ID2CAT_ALL[cat_id], exist_ok=True)
         file.save(UPLOAD_PATH / ID2CAT_ALL[cat_id] / hash_name)
 
-        content = {"user": username, "cat_id": cat_id, "img_name": hash_name}
-        write_line(content, USER_TO_IMAGE_FILE)
+        content = [{"user": username, "cat_id": cat_id, "img_name": hash_name}]
+        write_data(content, USER_TO_IMAGE_FILE)
         return redirect(request.url)
 
 
@@ -155,7 +156,7 @@ def admin():
     if request.method == "POST":
         voting_state = request.form.get("voting_state")
         print(voting_state)
-        write_line({voting_state: voting_state}, ADMIN_CONTROL_FILE)
+        write_data([{voting_state: voting_state}], ADMIN_CONTROL_FILE)
         return redirect(request.url)
 
     return render_template(

@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 
 import pandas as pd
-from flask import abort
 
 from .config import (
     ALLOWED_IMG_EXTENSIONS,
@@ -47,6 +46,7 @@ def is_voting_valid(funny_votes, cringe_votes):
 
 
 def category_voting_complete(category_id: int) -> bool:
+    """TODO: finish this."""
     if not os.path.exists(VOTES_FILE):
         return False
 
@@ -124,23 +124,15 @@ def read_data(csv_file: str) -> pd.DataFrame:
     return pd.read_csv(csv_file, header=0)
 
 
-def write_line(content: dict, csv_file: str, check_cols: list[str] | None = None):
+def write_data(content: list[dict], csv_file: str, check_cols: list[str] | None = None):
     """Write a line to a file. If the line already exists, the line will be overwritten."""
     os.makedirs(os.path.dirname(csv_file), exist_ok=True)
 
-    columns = list(content.keys())
-    existing_data = read_data(csv_file) if os.path.exists(csv_file) else pd.DataFrame(columns=columns)
+    existing_data = read_data(csv_file) if os.path.exists(csv_file) else None
+    content = pd.DataFrame(content)
 
-    if not existing_data.empty and set(columns) != set(existing_data.columns):
-        abort(400, description="Content does not match existing data.")
-
-    print("existing_data:", existing_data)
-    print("content:", pd.DataFrame(content, index=[0]))
-
-    # TODO: fix this
-    new_data = pd.concat([existing_data, pd.DataFrame(content, index=[0])]).drop_duplicates(
-        subset=check_cols, keep="last"
-    )
+    new_data = pd.concat([existing_data, content]) if existing_data is not None else content
+    new_data = new_data.drop_duplicates(check_cols, keep="last")
     new_data.to_csv(csv_file, index=False)
 
 
