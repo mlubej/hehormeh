@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>FlaskBlog</title>
+    <title>Admin page</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
@@ -12,9 +12,18 @@
     table, th, td {
       border:1px solid black;
     }
+    .form-container {
+            display: inline-flex;
+        }
+
+    form {
+        display: inline-block;
+        vertical-align: middle;
+    }
   </style>
 
   <body>
+    <a href="{{ url_for('index') }}">Go home</a>
     <h1>Hey Admin ;) </h1>
 
     <h2>JazJaz-redelnica:</h2>
@@ -48,14 +57,32 @@
       {% endfor %}
     </table>
 
-<h2>Voting control:</h2>
 <p>Current cat: <b>{{current_cat}}</b></p>
 
-<form method="POST">
-    <input type="submit" name="voting_state" value="Allow voting">
-    <input type="submit" name="voting_state" value="Freeze voting">
-    <p>Currently: TODO</p>
-</form>
+<h2>Staging control:</h2>
+<div class="form-container">
+  <form method="POST">
+      <input type="submit"  value="Upload">
+      <input type="hidden" name="stage" value="UPLOAD" />
+  </form>
+  <form method="POST">
+      <input type="submit"  value="Viewing">
+      <input type="hidden" name="stage" value="VIEWING" />
+  </form>
+  <form method="POST">
+      <input type="submit"  value="Voting">
+      <input type="hidden" name="stage" value="VOTING" />
+  </form>
+  <form method="POST">
+      <input type="submit"  value="Calculate scores">
+      <input type="hidden" name="stage" value="SCORE_CALC" />
+  </form>
+  <form method="POST">
+      <input type="submit"  value="Announce winners">
+      <input type="hidden" name="stage" value="WINNER_ANNOUNCEMENT" />
+  </form>
+</div>
+    <p>Current stage: {{curr_stage}} </p>
 
 
   </body>

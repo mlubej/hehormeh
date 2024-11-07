@@ -8,7 +8,6 @@ from flask import Flask, abort, redirect, render_template, request, url_for
 from werkzeug.utils import secure_filename
 
 from .config import (
-    ADMIN_CONTROL_FILE,
     HASH_SIZE,
     ID2CAT,
     ID2CAT_ALL,
@@ -20,6 +19,7 @@ from .config import (
     VOTES_FILE,
 )
 from .utils import (
+    Stages,
     get_next_votable_category_id,
     get_uploaded_images,
     get_uploaded_images_info,
@@ -35,6 +35,8 @@ from .utils import (
 app = Flask(__name__, static_folder=ROOT_DIR / "static")
 app.config["UPLOAD_FOLDER"] = UPLOAD_PATH
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024**2  # Limit upload data to 10 MiB
+
+CURRENT_STAGE = Stages.UPLOAD.name
 
 
 def get_remote_addr(request):
@@ -68,7 +70,11 @@ def index():
 
     address = get_remote_addr(request)
     return render_template(
-        "index.html", username=username, categories=get_next_votable_category_id(), is_host_admin=is_host_admin(address)
+        "index.html",
+        username=username,
+        categories=get_next_votable_category_id(),
+        is_host_admin=is_host_admin(address),
+        curr_stage=CURRENT_STAGE,
     )
 
 
@@ -147,6 +153,7 @@ def upload():
 @app.route("/admin", methods=["POST", "GET"])
 def admin():
     """Display info about users and control staging."""
+    global CURRENT_STAGE
     # TODO: add IPs of users
 
     address = get_remote_addr(request)
@@ -154,9 +161,8 @@ def admin():
         return redirect("/")
 
     if request.method == "POST":
-        voting_state = request.form.get("voting_state")
-        print(voting_state)
-        write_data([{voting_state: voting_state}], ADMIN_CONTROL_FILE)
+        # Get current stage
+        CURRENT_STAGE = request.form.get("stage")
         return redirect(request.url)
 
     return render_template(
@@ -165,4 +171,5 @@ def admin():
         user_uploads=get_uploaded_images_info(),
         trash_cat_id=TRASH_ID,
         current_cat=ID2CAT[get_next_votable_category_id()],
+        curr_stage=CURRENT_STAGE,
     )
