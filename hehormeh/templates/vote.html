@@ -11,7 +11,7 @@
     <a href="{{ url_for('index') }}">Go home</a>
     <hr style="width: 100%; height: 5px; background-color: black" />
 
-    <form action="/" method="post">
+    <form action="/vote" method="post">
       {% for image, is_author in image_and_author_info.items() %}
       {% set img_name = image.split('/')[-1] %}
       <div style="width: 100%; overflow: hidden">

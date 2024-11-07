@@ -51,23 +51,6 @@ def index():
     if not username:
         return redirect(url_for("login"))
 
-    if request.method == "POST":
-        cat_id = int(request.form["cat_id"])
-        img_names = {int(k.split("_")[-1]): v for k, v in request.form.items() if "img_name" in k}
-        funny_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "funny" in k}
-        cringe_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "cringe" in k}
-
-        if not is_voting_valid(funny_votes, cringe_votes):
-            abort(400, description="Make sure you vote for all the memes!")
-
-        contents = []
-        kwargs = {"user": username, "cat_id": cat_id}
-        for idx, img_name in img_names.items():
-            contents.append({**kwargs, "img_name": img_name, "funny": funny_votes[idx], "cringe": cringe_votes[idx]})
-
-        write_data(contents, VOTES_FILE, check_cols=["user", "cat_id", "img_name"])
-        return redirect("/")
-
     address = get_remote_addr(request)
     return render_template(
         "index.html",
@@ -97,9 +80,27 @@ def login():
     return render_template("login.html", username=username)
 
 
-@app.route("/vote", methods=["GET"])
+@app.route("/vote", methods=["GET", "POST"])
 def vote():
     """Display the images for a given category."""
+    username = get_user_or_none(get_remote_addr(request))
+    if request.method == "POST":
+        cat_id = int(request.form["cat_id"])
+        img_names = {int(k.split("_")[-1]): v for k, v in request.form.items() if "img_name" in k}
+        funny_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "funny" in k}
+        cringe_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "cringe" in k}
+
+        if not is_voting_valid(funny_votes, cringe_votes):
+            abort(400, description="Make sure you vote for all the memes!")
+
+        contents = []
+        kwargs = {"user": username, "cat_id": cat_id}
+        for idx, img_name in img_names.items():
+            contents.append({**kwargs, "img_name": img_name, "funny": funny_votes[idx], "cringe": cringe_votes[idx]})
+
+        write_data(contents, VOTES_FILE, check_cols=["user", "cat_id", "img_name"])
+        return redirect("/")
+
     cat_id = get_next_votable_category_id()
     # if voting not started yet:
     #     return abort(403, description="Voting not yet possible!")
@@ -161,7 +162,6 @@ def admin():
         return redirect("/")
 
     if request.method == "POST":
-        # Get current stage
         CURRENT_STAGE = request.form.get("stage")
         return redirect(request.url)
 
