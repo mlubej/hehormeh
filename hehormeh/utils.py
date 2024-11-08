@@ -17,6 +17,16 @@ from .config import (
 )
 
 
+class Stages(Enum):
+    """Enum of stages during meme night."""
+
+    UPLOAD = 0
+    VIEWING = 1
+    VOTING = 2
+    SCORE_CALC = 3
+    WINNER_ANNOUNCEMENT = 4
+
+
 def is_host_admin(address: str):
     """Return whether the IP address belongs to the host."""
     # return address == "127.0.0.1" or address == "0.0.0.0" or address == "localhost"
@@ -152,13 +162,3 @@ def reset_image(image_path: str):
     df = df[df.img_name != image_path.name]
     df.to_csv(USER_TO_IMAGE_FILE, index=False)
     image_path.unlink()
-
-
-class Stages(Enum):
-    """Enum of stages during meme night."""
-
-    UPLOAD = 0
-    VIEWING = 1
-    VOTING = 2
-    SCORE_CALC = 3
-    WINNER_ANNOUNCEMENT = 4
