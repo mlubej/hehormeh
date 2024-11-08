@@ -46,7 +46,7 @@ def get_user_or_none(ip: str) -> str | None:
     return mapping.get(ip, None)
 
 
-def get_users_IPs() -> dict:
+def get_users_ips() -> dict:
     """Get a dict with user as keys and the corresponding IP as the value."""
     if not os.path.exists(IP_TO_USER_FILE):
         return None
