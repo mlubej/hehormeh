@@ -18,7 +18,6 @@ TRASH_ID, TRASH_CATEGORY = -1, "trash"
 _CATEGORY_INFO = json.load(open(ROOT_DIR / "categories" / f"{YEAR}.json"))
 ID2CAT = {int(cat_id): cat for cat_id, cat in _CATEGORY_INFO.items()}
 ID2CAT_ALL = {**ID2CAT, TRASH_ID: TRASH_CATEGORY}
-NUM_OF_CATS = len(ID2CAT)
 
 ALLOWED_IMG_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif"}
 HASH_SIZE = 8
