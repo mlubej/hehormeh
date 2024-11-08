@@ -37,7 +37,7 @@ app = Flask(__name__, static_folder=ROOT_DIR / "static")
 app.config["UPLOAD_FOLDER"] = UPLOAD_PATH
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024**2  # Limit upload data to 10 MiB
 
-CURRENT_STAGE = Stages.UPLOAD.name
+CURRENT_STAGE = Stages.UPLOAD
 
 
 def get_remote_addr(request):
@@ -57,8 +57,7 @@ def index():
         "index.html",
         username=username,
         categories=get_next_votable_category_id(),
-        is_host_admin=is_host_admin(address),
-        curr_stage=CURRENT_STAGE,
+        curr_stage=CURRENT_STAGE.name,
     )
 
 
@@ -163,7 +162,7 @@ def admin():
         return redirect("/")
 
     if request.method == "POST":
-        CURRENT_STAGE = request.form.get("stage")
+        CURRENT_STAGE = Stages[request.form.get("stage")]
         return redirect(request.url)
 
     return render_template(
@@ -173,5 +172,5 @@ def admin():
         user_ips=get_users_IPs(),
         trash_cat_id=TRASH_ID,
         current_cat=ID2CAT[get_next_votable_category_id()],
-        curr_stage=CURRENT_STAGE,
+        curr_stage=CURRENT_STAGE.name,
     )
