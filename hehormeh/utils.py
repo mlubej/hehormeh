@@ -65,11 +65,14 @@ def is_voting_valid(funny_votes, cringe_votes):
 
 def users_voting_status(cat_id: int) -> dict[str, bool]:
     """Return a dict with users and their voting status for a category."""
-    votes_df = pd.read_csv(VOTES_FILE, header=0)
-    users_voted = votes_df[votes_df.cat_id == cat_id].user.unique()
-
     user_info_df = pd.read_csv(IP_TO_USER_FILE, header=0)
     eligible_users = user_info_df[~user_info_df.ip.apply(is_host_admin)].user.unique()  # remove host from the list
+
+    if not os.path.exists(VOTES_FILE):
+        return {user: False for user in eligible_users}
+
+    votes_df = pd.read_csv(VOTES_FILE, header=0)
+    users_voted = votes_df[votes_df.cat_id == cat_id].user.unique()
     return {user: user in users_voted for user in eligible_users}
 
 
