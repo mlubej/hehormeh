@@ -29,8 +29,7 @@ class Stages(Enum):
 
 def is_host_admin(address: str):
     """Return whether the IP address belongs to the host."""
-    # return address == "127.0.0.1" or address == "0.0.0.0" or address == "localhost"
-    return True
+    return address == "127.0.0.1" or address == "0.0.0.0" or address == "localhost"
 
 
 def has_valid_extension(filename: str) -> bool:
