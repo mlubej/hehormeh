@@ -83,6 +83,9 @@ def login():
 @app.route("/vote", methods=["GET", "POST"])
 def vote():
     """Display the images for a given category."""
+    if CURRENT_STAGE != Stages.VOTING:
+        abort(403, description="Voting not yet started!")
+
     username = get_user_or_none(get_remote_addr(request))
     if request.method == "POST":
         cat_id = int(request.form["cat_id"])
