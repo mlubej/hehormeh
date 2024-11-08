@@ -63,39 +63,32 @@ def is_voting_valid(funny_votes, cringe_votes):
     return all(v != -1 for v in score_values)
 
 
+def users_voting_status(cat_id: int) -> dict[str, bool]:
+    """Return a dict with users and their voting status for a category."""
+    votes_df = pd.read_csv(VOTES_FILE, header=0)
+    users_voted = votes_df[votes_df.cat_id == cat_id].user.unique()
+
+    user_info_df = pd.read_csv(IP_TO_USER_FILE, header=0)
+    eligible_users = user_info_df[~user_info_df.ip.apply(is_host_admin)].user.unique()  # remove host from the list
+    return {user: user in users_voted for user in eligible_users}
+
+
+def users_voting_status_all() -> dict[str, dict[str, bool]]:
+    """Gather the voting statuses for all categories."""
+    return {cat_id: users_voting_status(cat_id) for cat_id in ID2CAT.keys()}
+
+
 def category_voting_complete(category_id: int) -> bool:
-    """TODO: finish this."""
-    if not os.path.exists(VOTES_FILE):
-        return False
-
-    return True
+    """Check if the voting for a category is complete."""
+    return all(users_voting_status(category_id).values())
 
 
-# def meme_voting_finished(img_name: str) -> bool:
-#     """Check if everyone has voted for a given category."""
-#     upload_df = read_user_image_dataframe()
-#     if upload_df is None:
-#         return False
-
-#     # if not os.path.exists(IP_TO_USER_FILE) or not os.path.exists(VOTES_FILE):
-#     #     return False
-
-#     # user_info_df = pd.read_csv(IP_TO_USER_FILE, header=0)
-#     # user_info_df = user_info_df[~user_info_df.ip.apply(is_host_admin)]  # remove host from the list
-#     # n_eligible_users = user_info_df.user.nunique()
-
-#     # votes = pd.read_csv(VOTES_FILE, header=0)[["user", "cat_id"]].drop_duplicates()
-#     # n_voting_users = votes[votes.cat_id == category_id].user.nunique()
-#     # return n_voting_users == n_eligible_users
-
-
-def get_next_votable_category_id() -> int:
+def get_next_votable_category_id() -> int | None:
     """Return the next category ID that the user can vote for."""
     categories = {cat_id: cat for cat_id, cat in ID2CAT.items() if not category_voting_complete(cat_id)}
-    if len(categories) == 0:
-        return list(ID2CAT.keys())[0]
-
-    return list(categories.keys())[0]
+    if not categories:
+        return None
+    return next(iter(categories))
 
 
 def read_user_image_dataframe(username: str | None = None) -> pd.DataFrame | None:
