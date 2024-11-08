@@ -66,7 +66,7 @@
       {% endfor %}
     </table>
 
-<p>Current cat: <b>{{current_cat}}</b></p>
+<p>Current cat: <b>{% if current_cat %} {{current_cat}} {% else %} Voting complete! {% endif %}</b></p>
 
 <h2>Staging control:</h2>
 <div class="form-container">

@@ -171,6 +171,7 @@ def admin():
         CURRENT_STAGE = Stages[request.form.get("stage")]
         return redirect(request.url)
 
+    cat_id = get_next_votable_category_id()
     return render_template(
         "admin.html",
         categories=ID2CAT_ALL,
@@ -178,6 +179,6 @@ def admin():
         user_votes=users_voting_status_all(),
         user_ips=get_users_IPs(),
         trash_cat_id=TRASH_ID,
-        current_cat=ID2CAT[get_next_votable_category_id()],
+        current_cat=ID2CAT[cat_id] if cat_id is not None else None,
         curr_stage=CURRENT_STAGE.name,
     )
