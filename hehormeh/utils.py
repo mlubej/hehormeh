@@ -42,7 +42,7 @@ def get_user_or_none(ip: str) -> str | None:
     if not os.path.exists(IP_TO_USER_FILE):
         return None
 
-    mapping = dict(pd.read_csv(IP_TO_USER_FILE, header=0).values)
+    mapping = dict(pd.read_csv(IP_TO_USER_FILE, header=0)[["ip", "user"]].values)
     return mapping.get(ip, None)
 
 
