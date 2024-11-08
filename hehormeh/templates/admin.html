@@ -28,20 +28,28 @@
 
     <h2>JazJaz-redelnica:</h2>
     <table>
+      <tr></tr>
+        <th colspan="2"></th>
+        <th colspan="{{categories|length*2}}">categories</th>
       <tr>
-        <th>Users</th>
-        <th colspan="{{categories|length}}">categories</th>
+        <th colspan="2">User info</th>
+        {% for cat in categories.values() %}
+          <th colspan="2">{{cat}}</th>
+        {% endfor %}
       </tr>
       <tr>
-        <th></th>
-      {% for cat in categories.values() %}
-        <th>{{cat}}</th>
-      {% endfor %}
+        <th>Username</th>
+        <th>IP</th>
+        {% for cat in categories.values() %}
+          <th>Uploaded</th>
+          <th>Voted</th>
+        {% endfor %}
       </tr>
 
       {% for user, uploads in user_uploads.items() %}
         <tr>
           <td>{{user}}</td>
+          <td>{{user_ips[user]}}</td>
           {% for cat_id in categories.keys() %}
             <td>
               {% if cat_id == trash_cat_id%}
@@ -52,6 +60,7 @@
                 ❌
               {% endif %}
             </td>
+            <td>vote</td>
           {% endfor %}
         </tr>
       {% endfor %}

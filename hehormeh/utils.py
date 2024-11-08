@@ -37,6 +37,14 @@ def get_user_or_none(ip: str) -> str | None:
     return mapping.get(ip, None)
 
 
+def get_users_IPs() -> dict:
+    """Get a dict with user as keys and the corresponding IP as the value."""
+    if not os.path.exists(IP_TO_USER_FILE):
+        return None
+
+    return {row.user: row.ip for row in pd.read_csv(IP_TO_USER_FILE, header=0).itertuples(index=False)}
+
+
 def is_voting_valid(funny_votes, cringe_votes):
     """Check if the user has voted correctly.
 
