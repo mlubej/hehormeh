@@ -5,7 +5,7 @@
     <title>Admin page</title>
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
+      href="{{ url_for('static', filename='styles/style.css') }}"
     />
   </head>
   <style>
@@ -40,28 +40,28 @@
       <tr>
         <th>Username</th>
         <th>IP</th>
-        {% for cat in categories.values() %}
+        {% for cat_id, cat in categories.items() if not cat_id == trash_cat_id%}
           <th>Uploaded</th>
           <th>Voted</th>
         {% endfor %}
+        <th>Uploaded</th>
       </tr>
 
       {% for user, uploads in user_uploads.items() %}
         <tr>
           <td>{{user}}</td>
           <td>{{user_ips[user]}}</td>
-          {% for cat_id in categories.keys() %}
+          {% for cat_id in categories.keys() if not cat_id == trash_cat_id %}
             <td>
-              {% if cat_id == trash_cat_id%}
-                {{uploads[cat_id]}}
-              {% elif uploads[cat_id] == 1 %}
-                ️✅
-              {% else %}
-                ❌
-              {% endif %}
+              {% if uploads[cat_id] == 1 %} ️✅ {% else %} ❌ {% endif %}
             </td>
-            <td>vote</td>
+            <td>
+              {% if user_votes[cat_id][user] %} ️✅ {% else %} ❌ {% endif %}
+            </td>
           {% endfor %}
+          <td colspan="2">
+            {{ uploads[trash_cat_id] }}
+          </td>
         </tr>
       {% endfor %}
     </table>

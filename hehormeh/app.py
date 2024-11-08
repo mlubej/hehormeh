@@ -30,6 +30,7 @@ from .utils import (
     is_voting_valid,
     read_user_image_dataframe,
     reset_image,
+    users_voting_status_all,
     write_data,
 )
 
@@ -174,6 +175,7 @@ def admin():
         "admin.html",
         categories=ID2CAT_ALL,
         user_uploads=get_uploaded_images_info(),
+        user_votes=users_voting_status_all(),
         user_ips=get_users_IPs(),
         trash_cat_id=TRASH_ID,
         current_cat=ID2CAT[get_next_votable_category_id()],
