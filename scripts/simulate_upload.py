@@ -13,7 +13,6 @@ from hehormeh.config import ID2CAT, IP_TO_USER_FILE, ROOT_DIR, TRASH_CATEGORY, T
 
 n_users = 5
 users_and_ips = {f"user{i}": f"192.168.0.{i}" for i in range(1, n_users)}
-users_and_ips["admin"] = "127.0.0.1"
 # users_and_ips["matic"] = "192.168.1.X"
 # users_and_ips["bobi"] = "192.168.1.X"
 
