@@ -161,7 +161,6 @@ def upload():
 def admin():
     """Display info about users and control staging."""
     global CURRENT_STAGE
-    # TODO: add IPs of users
 
     address = get_remote_addr(request)
     if not is_host_admin(address):
