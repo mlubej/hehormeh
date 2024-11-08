@@ -11,3 +11,8 @@
 .collapse.show {
   max-height: 100px; /* adjust to your desired height */
 }
+
+td {
+  text-align: center;
+  vertical-align: middle;
+}
