@@ -20,6 +20,7 @@ from .config import (
 )
 from .utils import (
     Stages,
+    get_image_and_author_info,
     get_next_votable_category_id,
     get_uploaded_images,
     get_uploaded_images_info,
@@ -28,7 +29,6 @@ from .utils import (
     has_valid_extension,
     is_host_admin,
     is_voting_valid,
-    read_user_image_dataframe,
     reset_image,
     users_voting_status_all,
     write_data,
@@ -108,15 +108,7 @@ def vote():
         return redirect("/")
 
     cat_id = get_next_votable_category_id()
-    # if voting not started yet:
-    #     return abort(403, description="Voting not yet possible!")
-
-    df = read_user_image_dataframe()
-    df = df[df.cat_id == cat_id]
-    df["img_path"] = df.img_name.apply(lambda name: UPLOAD_PATH / ID2CAT[cat_id] / name)
-    img_and_author_info = {
-        str(row.img_path): row.user == get_user_or_none(request.remote_addr) for _, row in df.iterrows()
-    }
+    img_and_author_info = get_image_and_author_info(cat_id, username)
     return render_template("vote.html", cat_id=cat_id, cat=ID2CAT[cat_id], image_and_author_info=img_and_author_info)
 
 

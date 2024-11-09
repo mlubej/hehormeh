@@ -94,6 +94,14 @@ def get_next_votable_category_id() -> int | None:
     return next(iter(categories))
 
 
+def get_image_and_author_info(cat_id: int, username) -> dict:
+    """Return a dict of image paths and info whether the user is the author."""
+    df = read_user_image_dataframe()
+    df = df[df.cat_id == cat_id]
+    df["img_path"] = df.img_name.apply(lambda name: UPLOAD_PATH / ID2CAT[cat_id] / name)
+    return {str(row.img_path): row.user == username for _, row in df.iterrows()}
+
+
 def read_user_image_dataframe(username: str | None = None) -> pd.DataFrame | None:
     """Read the user2image dataframe."""
     if not os.path.exists(USER_TO_IMAGE_FILE):
