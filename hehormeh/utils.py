@@ -54,13 +54,12 @@ def get_users_IPs() -> dict:
     return {row.user: row.ip for row in pd.read_csv(IP_TO_USER_FILE, header=0).itertuples(index=False)}
 
 
-def is_voting_valid(funny_votes, cringe_votes):
-    """Check if the user has voted correctly.
-
-    The user can only be the author of one image per category and should mark it for both categories.
-    """
-    score_values = set(funny_votes.values()) | set(cringe_votes.values())
-    return all(v != -1 for v in score_values)
+def is_voting_valid(votes: dict, voted: dict) -> bool:
+    """Check if the user has voted correctly for a given score (funny/cringe)."""
+    for k, v in votes.items():
+        if not voted[k] and v == 0:
+            return False
+    return True
 
 
 def users_voting_status(cat_id: int) -> dict[str, bool]:
