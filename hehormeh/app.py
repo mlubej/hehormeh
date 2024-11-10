@@ -27,7 +27,7 @@ from .utils import (
     get_user_or_none,
     get_users_IPs,
     has_valid_extension,
-    is_host_admin,
+    is_host_address,
     is_voting_valid,
     reset_image,
     users_voting_status_all,
@@ -155,7 +155,7 @@ def admin():
     global CURRENT_STAGE
 
     address = get_remote_addr(request)
-    if not is_host_admin(address):
+    if not is_host_address(address):
         return redirect("/")
 
     if request.method == "POST":
