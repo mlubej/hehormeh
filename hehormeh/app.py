@@ -76,7 +76,7 @@ def login():
         if not new_username:
             abort(400, description="Please enter a valid username!")
 
-        if new_username == "admin" and not is_host_address(get_remote_addr(request)):
+        if new_username.lower() == "admin" and not is_host_address(get_remote_addr(request)):
             abort(403, description="You are not allowed to use this username!")
 
         content = [{"ip": get_remote_addr(request), "user": new_username}]
