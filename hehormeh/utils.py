@@ -4,6 +4,7 @@ import os
 from enum import Enum
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from .config import (
@@ -165,3 +166,41 @@ def reset_image(image_path: str):
     df = df[df.img_name != image_path.name]
     df.to_csv(USER_TO_IMAGE_FILE, index=False)
     image_path.unlink()
+
+
+def idxmedian(series: pd.Series) -> str:
+    """Return the index of the median value of the series."""
+    return series.index[np.argsort(series)[len(series) // 2]]
+
+
+def score_memes():
+    """Evaluate meme scores."""
+    votes = read_data(VOTES_FILE)
+    votes["both"] = votes.funny + votes.cringe
+
+    aggregations = [
+        ("najnajjazjaz", "funny", "idxmax"),
+        ("jazjaz_notranje_bolečine", "cringe", "idxmax"),
+        ("smesen_ful_majkemi", "both", "idxmax"),
+        ("jazjaz_ravnovesja", "both", idxmedian),
+    ]
+
+    return {name: votes.groupby("img_name").sum()[col].agg(func) for name, col, func in aggregations}
+
+
+def score_users():
+    """Evaluate user scores."""
+    uploads = read_data(USER_TO_IMAGE_FILE).set_index(["cat_id", "img_name"]).rename(columns={"user": "author"})
+    votes = read_data(VOTES_FILE).set_index(["cat_id", "img_name"]).rename(columns={"user": "voter"})
+    votes["both"] = votes.funny + votes.cringe
+
+    votes = pd.merge(votes, uploads, left_index=True, right_index=True).reset_index()
+
+    aggregations = [
+        ("meme_lord", "both", "idxmax"),
+        ("skremžni_knez", "cringe", "idxmax"),
+        ("grof_smehoslav", "funny", "idxmax"),
+        ("princesa_mediana", "both", idxmedian),
+    ]
+
+    return {name: votes.groupby("author").sum()[col].agg(func) for name, col, func in aggregations}
