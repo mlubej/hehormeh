@@ -27,9 +27,9 @@ class Stages(Enum):
     WINNER_ANNOUNCEMENT = 4
 
 
-def is_host_admin(address: str):
+def is_host_address(address: str):
     """Return whether the IP address belongs to the host."""
-    return address == "127.0.0.1" or address == "0.0.0.0" or address == "localhost"
+    return address in ["127.0.0.1", "0.0.0.0", "localhost"]
 
 
 def has_valid_extension(filename: str) -> bool:
@@ -65,7 +65,7 @@ def is_voting_valid(votes: dict, voted: dict) -> bool:
 def users_voting_status(cat_id: int) -> dict[str, bool]:
     """Return a dict with users and their voting status for a category."""
     user_info_df = pd.read_csv(IP_TO_USER_FILE, header=0)
-    eligible_users = user_info_df[~user_info_df.ip.apply(is_host_admin)].user.unique()  # remove host from the list
+    eligible_users = user_info_df[user_info_df.user != "admin"].user.unique()
 
     if not os.path.exists(VOTES_FILE):
         return {user: False for user in eligible_users}
