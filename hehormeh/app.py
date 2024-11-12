@@ -27,7 +27,7 @@ from .utils import (
     get_user_or_none,
     get_users_IPs,
     has_valid_extension,
-    is_host_admin,
+    is_host_address,
     is_voting_valid,
     reset_image,
     users_voting_status_all,
@@ -75,6 +75,9 @@ def login():
         new_username = request.form["user"]
         if not new_username:
             abort(400, description="Please enter a valid username!")
+
+        if new_username.lower() == "admin" and not is_host_address(get_remote_addr(request)):
+            abort(403, description="You are not allowed to use this username!")
 
         content = [{"ip": get_remote_addr(request), "user": new_username}]
         write_data(content, IP_TO_USER_FILE)
@@ -155,7 +158,7 @@ def admin():
     global CURRENT_STAGE
 
     address = get_remote_addr(request)
-    if not is_host_admin(address):
+    if not is_host_address(address):
         return redirect("/")
 
     if request.method == "POST":
