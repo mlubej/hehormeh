@@ -2,17 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>GlasuZameme</title>
+    <title>GlasujZameme</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   </head>
 
   <body>
-    <h2>GlasuZameme: {{ cat }}</h2>
+    <h2>GlasujZameme: {{ cat }}</h2>
     <a href="{{ url_for('index') }}">Go home</a>
     <hr style="width: 100%; height: 5px; background-color: black" />
 
-    <form action="/" method="post">
+    <form action="/vote" method="post">
       {% for image, is_author in image_and_author_info.items() %}
+      {% set img_name = image.split('/')[-1] %}
       <div style="width: 100%; overflow: hidden">
         <div style="width: 50%; float: left"><img src="{{ image }}" /></div>
         <div style="margin-left: 70%">
@@ -20,7 +21,8 @@
           <div>Sori bre, ta je tvoj...<br />Daj 5ko nekam drugam.</div>
           {% else %}
           <div>Funny</div>
-          <select name="'funny_{{ loop.index0 }}">
+          <select name="funny_{{ loop.index0 }}">
+            <option value="-1">Select score</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -29,12 +31,14 @@
           </select>
           <div>Cringe</div>
           <select name="cringe_{{ loop.index0 }}">
+            <option value="-1" >Select score</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
             <option value="4">4</option>
             <option value="5">5</option>
           </select>
+          <input type="hidden" name="img_name_{{ loop.index0 }}" value="{{img_name}}" />
         </div>
         {% endif %}
       </div>

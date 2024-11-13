@@ -1,0 +1,47 @@
+.collapsible-header {
+  cursor: pointer;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.collapse {
+  transition: max-height 0.5s;
+}
+
+.collapse.show {
+  max-height: 100px; /* adjust to your desired height */
+}
+
+td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.progress-bar-continer {
+  height: 80px;
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #406086;
+}
+
+.progress-bar {
+  background-color: #1b3e80;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  transition: width 1s; /* Makes progressBar smooth */
+  transition-timing-function: linear; /* Try to remove this line for more tick tock feel */
+}
+
+.progress-bar-text {
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+}

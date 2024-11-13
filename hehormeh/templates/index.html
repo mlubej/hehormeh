@@ -10,15 +10,22 @@
     <h1>Welcome to Heh or Meh Land</h1>
 
     Logged in as: <b>{{ username }}</b>
-    <br />
-    Upload your memes <a href="/upload">here</a>
+    <br>
 
-    <h3>Go to category:</h3>
-
-    {% for cat_id, cat in categories.items() %}
-      <a href="{{ url_for('vote', cat_id=cat_id) }}">{{cat}}</a>
+    {% if curr_stage == "UPLOAD" %}
+      <h3>Upload yer memes</h3>
+      Upload your memes <a href="/upload">here</a>
       <br />
-    {% endfor %}
+      <h4>Wait for voting to open</h4>
+    {% elif curr_stage == "VIEWING" %}
+      <h4>Look at the memes first</h4>
+    {% elif curr_stage == "VOTING" %}
+      <h4>Vote for next category:</h4>
+      <a href="/vote">Vote here</a>
+    {% else %}
+      <h4>Voting complete</h4>
+    {% endif %}
+    <br />
 
     {% if is_host_admin %}
       <br /><br />
