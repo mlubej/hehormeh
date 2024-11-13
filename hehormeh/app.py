@@ -30,6 +30,8 @@ from .utils import (
     is_host_address,
     is_voting_valid,
     reset_image,
+    score_memes,
+    score_users,
     users_voting_status_all,
     write_data,
 )
@@ -153,6 +155,21 @@ def upload():
     username = get_user_or_none(get_remote_addr(request))
     user_images = get_uploaded_images(username)
     return render_template("upload.html", categories=ID2CAT_ALL, trash_cat_id=TRASH_ID, user_images=user_images)
+
+
+@app.route("/scoreboard", methods=["GET", "POST"])
+def scoreboard():
+    """Display the scoreboard."""
+    global CURRENT_STAGE
+
+    if CURRENT_STAGE not in [Stages.SCORE_CALC, Stages.WINNER_ANNOUNCEMENT]:
+        abort(403, description="Scoreboard not ready yet!")
+
+    if request.method == "POST":
+        CURRENT_STAGE = Stages[request.form.get("stage")]
+        return redirect("/scoreboard")
+
+    return render_template("scoreboard.html", results={**score_memes(), **score_users()}, stage=CURRENT_STAGE.name)
 
 
 @app.route("/admin", methods=["POST", "GET"])
