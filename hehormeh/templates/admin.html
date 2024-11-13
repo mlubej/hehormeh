@@ -93,10 +93,12 @@
 </div>
     <p>Current stage: {{curr_stage}} </p>
 
+    <br>
  <form method="post">
       <input type="submit" value="Generate QR code ↑" />
       <input type="hidden" name="generate_qr" value="generate_qr" />
     </form>
+    <br>
     <a href="/qr" target="_blank">
       <img src="{{qr_code_img}}" alt="Server link" width="100"/>
     </a>

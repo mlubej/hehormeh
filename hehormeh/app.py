@@ -21,6 +21,7 @@ from .config import (
 )
 from .utils import (
     Stages,
+    generate_server_link_QR_code,
     get_image_and_author_info,
     get_next_votable_category_id,
     get_uploaded_images,
@@ -180,7 +181,12 @@ def admin():
         return redirect("/")
 
     if request.method == "POST":
-        CURRENT_STAGE = Stages[request.form.get("stage")]
+        new_stage = request.form.get("stage")
+        CURRENT_STAGE = Stages[new_stage] if new_stage else CURRENT_STAGE
+
+        print(request.remote_addr)
+        if request.form.get("generate_qr"):
+            generate_server_link_QR_code(request)
         return redirect(request.url)
 
     cat_id = get_next_votable_category_id()

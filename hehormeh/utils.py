@@ -1,6 +1,7 @@
 """Utility functions for the hehormeh app."""
 
 import os
+import socket
 from enum import Enum
 from pathlib import Path
 
@@ -191,9 +192,23 @@ def reset_image(image_path: str):
     image_path.unlink()
 
 
-def generate_server_link_QR_code(request):
+def get_private_ip() -> str:
+    """."""
+    # Creates a socket connection to a remote host (Google DNS server) to get the local IP address
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Connect to an external DNS server; doesn't actually send data
+        s.connect(("8.8.8.8", 80))
+        # Gets the private IP of the current machine
+        private_ip = s.getsockname()[0]
+    finally:
+        s.close()
+    return private_ip
+
+
+def generate_server_link_QR_code(request) -> None:
     """Generate QR code from the server link."""
-    url = f"http://{request.headers.get('Host')}"
+    url = f"http://{get_private_ip()}:{request.headers.get('Host').split(':')[-1]}"
     img = qrcode.make(url, image_factory=qrcode.image.svg.SvgImage)
     with open(QR_CODE_IMAGE_SAVE_PATH, "wb") as qr:
         img.save(qr)
