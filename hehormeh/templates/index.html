@@ -16,11 +16,22 @@
     <br />
     {% if curr_stage == "UPLOAD" %}
     <a href="/upload" class="btn-link">Upload memes</a>
-    <br />
+
+    <!-- Don't judge :( -->
+    <br /><br /><br /><br /><br /><br />
+
+    <div class="expanding-text">
+      <button class="toggle-btn" onclick="toggleText('info', 'zapri')">Info</button>
+      <div class="text-content" id="textContent">
+        <p>Počaki, da vsi naložijo svoje meme-tete</p>
+      </div>
+    </div>
     {% elif curr_stage == "VIEWING" %}
     <h4>Look at the memes first</h4>
+    <!-- Don't judge :( -->
+    <br /><br /><br /><br /><br /><br />
     <div class="expanding-text">
-      <button class="toggle-btn" onclick="toggleText()">Info</button>
+      <button class="toggle-btn" onclick="toggleText('info', 'gotem')">Info</button>
       <div class="text-content" id="textContent">
         <a href="https://emoji.gg/emoji/4882_gotem"
           ><img
@@ -32,31 +43,24 @@
     </div>
     {% elif curr_stage == "VOTING" %}
     <a href="/vote" class="btn-link">Vote here</a>
+    <br><br>
     {% else %}
     <h4>Voting complete</h4>
     {% endif %}
-
-    <br />
-    <br />
-    <br />
-    <!-- Dont judge :( -->
-    <br />
-    <br />
-    <br />
 
     {% if is_host_admin %} Admin page: <a href="/admin">here</a>
     {% endif %}
 
     <script>
-      function toggleText() {
+      function toggleText(expand_text, close_text) {
         const textContent = document.getElementById("textContent");
         const button = document.querySelector(".toggle-btn");
         if (textContent.style.display === "none" || textContent.style.display === "") {
           textContent.style.display = "block";
-          button.textContent = "Gotem";
+          button.textContent = close_text;
         } else {
           textContent.style.display = "none";
-          button.textContent = "info";
+          button.textContent = expand_text;
         }
       }
     </script>
