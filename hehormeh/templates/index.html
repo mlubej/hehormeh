@@ -3,29 +3,62 @@
   <head>
     <meta charset="UTF-8" />
     <title>HehOrMeh</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles/style.css') }}"
+    />
   </head>
 
   <body>
     <h1>Welcome to Heh or Meh Land</h1>
-    <br>
+    <br />
     Logged in as: <b>{{ username }}</b>
-    <br>
+    <br />
     {% if curr_stage == "UPLOAD" %}
-      <a href="/upload" class="btn-link">Upload memes</a>
-      <br />
+    <a href="/upload" class="btn-link">Upload memes</a>
+    <br />
     {% elif curr_stage == "VIEWING" %}
-      <h4>Look at the memes first</h4>
+    <h4>Look at the memes first</h4>
+    <div class="expanding-text">
+      <button class="toggle-btn" onclick="toggleText()">Info</button>
+      <div class="text-content" id="textContent">
+        <a href="https://emoji.gg/emoji/4882_gotem"
+          ><img
+            src="https://cdn3.emoji.gg/emojis/4882_gotem.png"
+            style="width: 200px; height: 200px"
+            alt="gotem"
+        /></a>
+      </div>
+    </div>
     {% elif curr_stage == "VOTING" %}
-      <a href="/vote" class="btn-link">Vote here</a>
+    <a href="/vote" class="btn-link">Vote here</a>
     {% else %}
-      <h4>Voting complete</h4>
+    <h4>Voting complete</h4>
     {% endif %}
+
+    <br />
+    <br />
+    <br />
+    <!-- Dont judge :( -->
+    <br />
+    <br />
     <br />
 
-    {% if is_host_admin %}
-      <br /><br />
-      Admin page: <a href="/admin">here</a>
+    {% if is_host_admin %} Admin page: <a href="/admin">here</a>
     {% endif %}
+
+    <script>
+      function toggleText() {
+        const textContent = document.getElementById("textContent");
+        const button = document.querySelector(".toggle-btn");
+        if (textContent.style.display === "none" || textContent.style.display === "") {
+          textContent.style.display = "block";
+          button.textContent = "Gotem";
+        } else {
+          textContent.style.display = "none";
+          button.textContent = "info";
+        }
+      }
+    </script>
   </body>
 </html>
