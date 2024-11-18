@@ -21,13 +21,14 @@ from .config import (
 )
 from .utils import (
     Stages,
-    generate_server_link_QR_code,
+    generate_server_link_qr_code,
     get_image_and_author_info,
     get_next_votable_category_id,
+    get_private_ip,
     get_uploaded_images,
     get_uploaded_images_info,
     get_user_or_none,
-    get_users_IPs,
+    get_users_ips,
     has_valid_extension,
     is_host_address,
     is_voting_valid,
@@ -184,9 +185,10 @@ def admin():
         new_stage = request.form.get("stage")
         CURRENT_STAGE = Stages[new_stage] if new_stage else CURRENT_STAGE
 
-        print(request.remote_addr)
         if request.form.get("generate_qr"):
-            generate_server_link_QR_code(request)
+            addr = get_private_ip()
+            port = request.environ.get("SERVER_PORT")
+            generate_server_link_qr_code(addr, port)
         return redirect(request.url)
 
     cat_id = get_next_votable_category_id()
@@ -195,7 +197,7 @@ def admin():
         categories=ID2CAT_ALL,
         user_uploads=get_uploaded_images_info(),
         user_votes=users_voting_status_all(),
-        user_ips=get_users_IPs(),
+        user_ips=get_users_ips(),
         trash_cat_id=TRASH_ID,
         current_cat=ID2CAT[cat_id] if cat_id is not None else None,
         curr_stage=CURRENT_STAGE.name,

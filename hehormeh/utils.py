@@ -51,7 +51,7 @@ def get_user_or_none(ip: str) -> str | None:
     return mapping.get(ip, None)
 
 
-def get_users_IPs() -> dict:
+def get_users_ips() -> dict:
     """Get a dict with user as keys and the corresponding IP as the value."""
     if not os.path.exists(IP_TO_USER_FILE):
         return None
@@ -122,21 +122,6 @@ def read_user_image_dataframe(username: str | None = None) -> pd.DataFrame | Non
     return df
 
 
-def get_user_ip(username: str | None = None) -> pd.DataFrame | None:
-    """Read the user2image dataframe."""
-    if not os.path.exists(USER_TO_IMAGE_FILE):
-        return None
-
-    df = read_data(USER_TO_IMAGE_FILE)
-    if username is not None:
-        df = df[df["user"] == username]
-
-    if df.empty:
-        return None
-
-    return df
-
-
 def get_uploaded_images(username: str) -> dict[str, list[str]]:
     """Return a dict with images uploaded by a user for each category."""
     df = read_user_image_dataframe(username)
@@ -193,7 +178,7 @@ def reset_image(image_path: str):
 
 
 def get_private_ip() -> str:
-    """."""
+    """Return servers IP address via a hack chatgpt provided."""
     # Creates a socket connection to a remote host (Google DNS server) to get the local IP address
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
@@ -206,9 +191,9 @@ def get_private_ip() -> str:
     return private_ip
 
 
-def generate_server_link_QR_code(request) -> None:
+def generate_server_link_qr_code(addr: str, port: str) -> None:
     """Generate QR code from the server link."""
-    url = f"http://{get_private_ip()}:{request.headers.get('Host').split(':')[-1]}"
+    url = f"http://{addr}:{port}"
     img = qrcode.make(url, image_factory=qrcode.image.svg.SvgImage)
     with open(QR_CODE_IMAGE_SAVE_PATH, "wb") as qr:
         img.save(qr)
