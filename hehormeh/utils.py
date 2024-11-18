@@ -1,17 +1,21 @@
 """Utility functions for the hehormeh app."""
 
 import os
+import socket
 from enum import Enum
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import qrcode
+import qrcode.image.svg
 
 from .config import (
     ALLOWED_IMG_EXTENSIONS,
     ID2CAT,
     ID2CAT_ALL,
     IP_TO_USER_FILE,
+    QR_CODE_IMAGE_SAVE_PATH,
     UPLOAD_PATH,
     USER_TO_IMAGE_FILE,
     VOTES_FILE,
@@ -47,7 +51,7 @@ def get_user_or_none(ip: str) -> str | None:
     return mapping.get(ip, None)
 
 
-def get_users_IPs() -> dict:
+def get_users_ips() -> dict:
     """Get a dict with user as keys and the corresponding IP as the value."""
     if not os.path.exists(IP_TO_USER_FILE):
         return None
@@ -158,6 +162,11 @@ def write_data(content: list[dict], csv_file: str, check_cols: list[str] | None 
     new_data.to_csv(csv_file, index=False)
 
 
+def is_host_admin(address: str):
+    """Return whether the IP address belongs to the host."""
+    return address == "127.0.0.1" or address == "0.0.0.0" or address == "localhost"
+
+
 def reset_image(image_path: str):
     """Reset image with given name."""
     image_path = Path(image_path)
@@ -165,6 +174,28 @@ def reset_image(image_path: str):
     df = df[df.img_name != image_path.name]
     df.to_csv(USER_TO_IMAGE_FILE, index=False)
     image_path.unlink()
+
+
+def get_private_ip() -> str:
+    """Return servers IP address via a hack chatgpt provided."""
+    # Creates a socket connection to a remote host (Google DNS server) to get the local IP address
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Connect to an external DNS server; doesn't actually send data
+        s.connect(("8.8.8.8", 80))
+        # Gets the private IP of the current machine
+        private_ip = s.getsockname()[0]
+    finally:
+        s.close()
+    return private_ip
+
+
+def generate_server_link_qr_code(addr: str, port: str) -> None:
+    """Generate QR code from the server link."""
+    url = f"http://{addr}:{port}"
+    img = qrcode.make(url, image_factory=qrcode.image.svg.SvgImage)
+    with open(QR_CODE_IMAGE_SAVE_PATH, "wb") as qr:
+        img.save(qr)
 
 
 def idxmedian(series: pd.Series) -> str:
