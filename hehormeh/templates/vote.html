@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>GlasujZameme</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}" />
   </head>
 
   <body>
@@ -14,34 +14,25 @@
     <form action="/vote" method="post">
       {% for image, is_author in image_and_author_info.items() %}
       {% set img_name = image.split('/')[-1] %}
-      <div style="width: 100%; overflow: hidden">
-        <div style="width: 50%; float: left"><img src="{{ image }}" /></div>
-        <div style="margin-left: 70%">
+        <img src="{{ image }}" />
           {% if is_author %}
           <div>Sori bre, ta je tvoj...<br />Daj 5ko nekam drugam.</div>
           {% else %}
-          <div>Funny</div>
-          <select name="funny_{{ loop.index0 }}">
-            <option value="-1">Select score</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
-          <div>Cringe</div>
-          <select name="cringe_{{ loop.index0 }}">
-            <option value="-1" >Select score</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
+          <!-- Slider for voting -->
+          <div class="slider-container">
+            <b>meh</b>
+            <input type="range" id="funny_slider_{{ loop.index0 }}" name="funny_slider_{{ loop.index0 }}" min="-1" max="100" value="-1" oninput="markSliderMoved(this); updateThumbColor(this)" class="slider">
+            <b>heh</b>
+          </div>
+
+          <div class="slider-container">
+            <b>🗿</b>
+            <input type="range" id="cringe_slider_{{ loop.index0 }}" name="cringe_slider_{{ loop.index0 }}" min="-1" max="100" value="-1" oninput="markSliderMoved(this); updateThumbColor(this)" class="slider">
+            <b>FBC</b>
+          </div>
+
           <input type="hidden" name="img_name_{{ loop.index0 }}" value="{{img_name}}" />
-        </div>
         {% endif %}
-      </div>
       <br />
       <hr style="width: 100%; height: 5px; background-color: black" />
       {% endfor %}
@@ -50,5 +41,29 @@
       <input type="submit" value="Submit values" />
       <input type="hidden" name="cat_id" value="{{cat_id}}" />
     </form>
+  <script>
+    function markSliderMoved(sliderElement) {
+      // Change the slider's minimum value to 0 when moved
+      if (sliderElement.min === "-1") {
+        sliderElement.min = "0";
+      }
+    }
+
+function updateThumbColor(sliderElement) {
+    const value = sliderElement.value;
+    const min = sliderElement.min;
+    const max = sliderElement.max;
+
+    // Calculate the hue value for smooth transition (red = 0°, green = 120°)
+    const hue = ((value / (max - min)) * 120).toFixed(0);
+
+    // Convert hue to HSL color
+    const thumbColor = `hsl(${hue}, 100%, 50%)`;
+
+    // Update the CSS variable controlling the thumb color
+    sliderElement.style.setProperty('--thumb-color', thumbColor);
+
+  }
+  </script>
   </body>
 </html>
