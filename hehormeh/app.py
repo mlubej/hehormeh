@@ -12,6 +12,7 @@ from .config import (
     ID2CAT,
     ID2CAT_ALL,
     IP_TO_USER_FILE,
+    QR_CODE_IMAGE_FILE_NAME,
     ROOT_DIR,
     TRASH_ID,
     UPLOAD_PATH,
@@ -20,16 +21,20 @@ from .config import (
 )
 from .utils import (
     Stages,
+    generate_server_link_qr_code,
     get_image_and_author_info,
     get_next_votable_category_id,
+    get_private_ip,
     get_uploaded_images,
     get_uploaded_images_info,
     get_user_or_none,
-    get_users_IPs,
+    get_users_ips,
     has_valid_extension,
-    is_host_admin,
+    is_host_address,
     is_voting_valid,
     reset_image,
+    score_memes,
+    score_users,
     users_voting_status_all,
     write_data,
 )
@@ -75,6 +80,9 @@ def login():
         new_username = request.form["user"]
         if not new_username:
             abort(400, description="Please enter a valid username!")
+
+        if new_username.lower() == "admin" and not is_host_address(get_remote_addr(request)):
+            abort(403, description="You are not allowed to use this username!")
 
         content = [{"ip": get_remote_addr(request), "user": new_username}]
         write_data(content, IP_TO_USER_FILE)
@@ -152,17 +160,38 @@ def upload():
     return render_template("upload.html", categories=ID2CAT_ALL, trash_cat_id=TRASH_ID, user_images=user_images)
 
 
+@app.route("/scoreboard", methods=["GET", "POST"])
+def scoreboard():
+    """Display the scoreboard."""
+    global CURRENT_STAGE
+
+    if CURRENT_STAGE not in [Stages.SCORE_CALC, Stages.WINNER_ANNOUNCEMENT]:
+        abort(403, description="Scoreboard not ready yet!")
+
+    if request.method == "POST":
+        CURRENT_STAGE = Stages[request.form.get("stage")]
+        return redirect("/scoreboard")
+
+    return render_template("scoreboard.html", results={**score_memes(), **score_users()}, stage=CURRENT_STAGE.name)
+
+
 @app.route("/admin", methods=["POST", "GET"])
 def admin():
     """Display info about users and control staging."""
     global CURRENT_STAGE
 
     address = get_remote_addr(request)
-    if not is_host_admin(address):
+    if not is_host_address(address):
         return redirect("/")
 
     if request.method == "POST":
-        CURRENT_STAGE = Stages[request.form.get("stage")]
+        new_stage = request.form.get("stage")
+        CURRENT_STAGE = Stages[new_stage] if new_stage else CURRENT_STAGE
+
+        if request.form.get("generate_qr"):
+            addr = get_private_ip()
+            port = request.environ.get("SERVER_PORT")
+            generate_server_link_qr_code(addr, port)
         return redirect(request.url)
 
     cat_id = get_next_votable_category_id()
@@ -171,8 +200,15 @@ def admin():
         categories=ID2CAT_ALL,
         user_uploads=get_uploaded_images_info(),
         user_votes=users_voting_status_all(),
-        user_ips=get_users_IPs(),
+        user_ips=get_users_ips(),
         trash_cat_id=TRASH_ID,
         current_cat=ID2CAT[cat_id] if cat_id is not None else None,
         curr_stage=CURRENT_STAGE.name,
+        qr_code_img=f"static/{QR_CODE_IMAGE_FILE_NAME}",
     )
+
+
+@app.route("/qr")
+def qr():
+    """Display QR code to connect to the server."""
+    return render_template("qr.html", qr_code_img=f"static/{QR_CODE_IMAGE_FILE_NAME}")

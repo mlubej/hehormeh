@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin page</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles/style.css') }}"
+    />
+  </head>
+  <style>
+    table, th, td {
+      border:1px solid black;
+    }
+    .form-container {
+            display: inline-flex;
+        }
+
+    form {
+        display: inline-block;
+        vertical-align: middle;
+    }
+  </style>
+
+  <body>
+    <a href="{{ url_for('index') }}">Go home</a>
+
+    <br>
+    <br>
+    <br>
+
+    {% if stage == "SCORE_CALC" %}
+      <div class="progress-bar-continer">
+        <div class="progress-bar" id="progress-bar"></div>
+        <div class="progress-bar-text" id="progress-bar-text"></div>
+      <div>
+
+      <p style="margin-bottom:10cm;"> </p>
+      <form method="post">
+        <input id="show_score_button", type="hidden" value="Show scores!" />
+        <input type="hidden" name="stage" value="WINNER_ANNOUNCEMENT" />
+      </form>
+    {% else %}
+      <div>
+        {% for k, v in results.items() %}
+          {{k}}: {{v}} <br>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <script>
+
+      let interval;
+      let current = 0;
+      let stop = 20;
+      let progressBarTextElement = document.getElementById('progress-bar-text');
+      let progressBarElement = document.getElementById('progress-bar');
+
+      tick_period = 100; // every 0.1 s
+
+      function render() {
+        let progressPercentage = current;
+
+        progressBarElement.style.width = progressPercentage + '%';
+        progressBarTextElement.innerHTML = progressPercentage + '%';
+
+        if (progressPercentage >= stop) {
+          document.getElementById('show_score_button').type = 'submit';
+        }
+      }
+
+      function tick() {
+        current += 1;
+        if(current >= stop) {
+          clearInterval(interval); //Stops interval
+        }
+
+        render(); //Updates html
+      }
+
+      function startProgressBar() {
+        interval = setInterval(tick, tick_period); //Will call tick every second
+        render();
+      }
+
+      startProgressBar();
+    </script>
+  </body>
+</html>
