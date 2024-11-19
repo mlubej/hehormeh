@@ -60,10 +60,7 @@ def get_users_ips() -> dict:
 
 
 def is_voting_valid(funny_votes, cringe_votes):
-    """Check if the user has voted correctly.
-
-    The user can only be the author of one image per category and should mark it for both categories.
-    """
+    """Check if the user has voted correctly."""
     score_values = set(funny_votes.values()) | set(cringe_votes.values())
     return all(v != -1 for v in score_values)
 

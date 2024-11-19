@@ -101,6 +101,7 @@ def vote():
     if request.method == "POST":
         cat_id = int(request.form["cat_id"])
         img_names = {int(k.split("_")[-1]): v for k, v in request.form.items() if "img_name" in k}
+
         funny_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "funny" in k}
         cringe_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "cringe" in k}
 
