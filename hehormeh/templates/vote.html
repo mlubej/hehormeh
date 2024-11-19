@@ -21,19 +21,15 @@
           <!-- Slider for voting -->
           <div class="slider-container">
             <b>meh</b>
-            <input type="range" id="funny_slider_{{ loop.index0 }}" name="funny_slider_{{ loop.index0 }}" min="0" max="100" value="0" oninput="markSliderMoved('f_slider_moved_{{ loop.index0 }}')" class="slider">
+            <input type="range" id="funny_slider_{{ loop.index0 }}" name="funny_slider_{{ loop.index0 }}" min="-1" max="100" value="-1" oninput="markSliderMoved(this); updateThumbColor(this)" class="slider">
             <b>heh</b>
           </div>
-          <!-- Hidden field to track if the slider was moved -->
-          <input type="hidden" id="f_slider_moved_{{ loop.index0 }}" name="f_slider_moved_{{ loop.index0 }}" value="0">
 
           <div class="slider-container">
             <b>🗿</b>
-            <input type="range" id="cringe_slider_{{ loop.index0 }}" name="cringe_slider_{{ loop.index0 }}" min="0" max="100" value="0" oninput="markSliderMoved('c_slider_moved_{{ loop.index0 }}')" class="slider">
+            <input type="range" id="cringe_slider_{{ loop.index0 }}" name="cringe_slider_{{ loop.index0 }}" min="-1" max="100" value="-1" oninput="markSliderMoved(this); updateThumbColor(this)" class="slider">
             <b>FBC</b>
           </div>
-          <!-- Hidden field to track if the slider was moved -->
-          <input type="hidden" id="c_slider_moved_{{ loop.index0 }}" name="c_slider_moved_{{ loop.index0 }}" value="0">
 
           <input type="hidden" name="img_name_{{ loop.index0 }}" value="{{img_name}}" />
         {% endif %}
@@ -46,9 +42,28 @@
       <input type="hidden" name="cat_id" value="{{cat_id}}" />
     </form>
   <script>
-    function markSliderMoved(slider_moved_id) {
-      document.getElementById(slider_moved_id).value = "1";
+    function markSliderMoved(sliderElement) {
+      // Change the slider's minimum value to 0 when moved
+      if (sliderElement.min === "-1") {
+        sliderElement.min = "0";
+      }
     }
+
+function updateThumbColor(sliderElement) {
+    const value = sliderElement.value;
+    const min = sliderElement.min;
+    const max = sliderElement.max;
+
+    // Calculate the hue value for smooth transition (red = 0°, green = 120°)
+    const hue = ((value / (max - min)) * 120).toFixed(0);
+
+    // Convert hue to HSL color
+    const thumbColor = `hsl(${hue}, 100%, 50%)`;
+
+    // Update the CSS variable controlling the thumb color
+    sliderElement.style.setProperty('--thumb-color', thumbColor);
+
+  }
   </script>
   </body>
 </html>

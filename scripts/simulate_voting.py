@@ -38,8 +38,8 @@ while get_next_votable_category_id() is not None:
             data = {
                 **data,
                 f"img_name_{idx}": row.img_name,
-                f"funny_{idx}": random.randint(1, 5),
-                f"cringe_{idx}": random.randint(1, 5),
+                f"funny_{idx}": random.randint(0, 100),
+                f"cringe_{idx}": random.randint(0, 100),
             }
 
         headers = {"X-Test-IP": ip}

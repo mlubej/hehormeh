@@ -103,11 +103,9 @@ def vote():
         img_names = {int(k.split("_")[-1]): v for k, v in request.form.items() if "img_name" in k}
 
         funny_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "funny" in k}
-        funny_voted = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "f_slider_moved" in k}
         cringe_votes = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "cringe" in k}
-        cringe_voted = {int(k.split("_")[-1]): int(v) for k, v in request.form.items() if "c_slider_moved" in k}
 
-        if not is_voting_valid(funny_votes, funny_voted) or not is_voting_valid(cringe_votes, cringe_voted):
+        if not is_voting_valid(funny_votes, cringe_votes):
             abort(400, description="Make sure you vote for all the memes!")
 
         contents = []
