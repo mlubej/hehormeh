@@ -3,10 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Admin page</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='styles/style.css') }}"
-    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
   </head>
   <style>
     table,
@@ -26,7 +23,8 @@
 
   <body>
     <a href="{{ url_for('index') }}">Go home</a>
-    <h1>Hey Admin ;)</h1>
+    <br>
+    <h1>Hey Admin ;) </h1>
 
     <h2>JazJaz-redelnica:</h2>
     <table>
@@ -101,7 +99,7 @@
     </form>
     <br />
     <a href="/qr" target="_blank">
-      <img src="{{qr_code_img}}" alt="Server link" width="100" />
+      <img src="{{qr_code_img}}" alt="Server link" style="width: 200px; height: 200px;" />
     </a>
   </body>
 </html>
