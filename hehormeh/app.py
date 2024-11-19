@@ -189,6 +189,7 @@ def admin():
             addr = get_private_ip()
             port = request.environ.get("SERVER_PORT")
             generate_server_link_qr_code(addr, port)
+
         return redirect(request.url)
 
     cat_id = get_next_votable_category_id()
