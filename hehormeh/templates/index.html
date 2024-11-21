@@ -42,7 +42,14 @@
       </div>
     </div>
     {% elif curr_stage == "VOTING" %}
-      <a href="/vote" class="btn-link">Vote here</a>
+      {% if is_host_admin %}
+        <!-- do nothing -->
+      {% elif voted_status %}
+        <a href="/vote" class="btn-link">Vote again</a>
+        Alredy voted 👍
+      {% else %}
+        <a href="/vote" class="btn-link">Vote here</a>
+      {% endif%}
     <br><br>
     {% else %}
       <h4>Voting complete</h4>
