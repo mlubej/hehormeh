@@ -35,6 +35,7 @@ from .utils import (
     reset_image,
     score_memes,
     score_users,
+    users_voting_status,
     users_voting_status_all,
     write_data,
 )
@@ -44,6 +45,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_PATH
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024**2  # Limit upload data to 10 MiB
 
 CURRENT_STAGE = Stages.UPLOAD
+OLD_CAT_ID = get_next_votable_category_id()
 
 
 def get_remote_addr(request):
@@ -54,15 +56,24 @@ def get_remote_addr(request):
 @app.route("/", methods=["GET", "POST"])
 def index():
     """Display the main page of the app."""
+    global CURRENT_STAGE
+    global OLD_CAT_ID
+
     username = get_user_or_none(get_remote_addr(request))
     if not username:
         return redirect(url_for("login"))
 
+    cat_id = get_next_votable_category_id()
+    if OLD_CAT_ID != cat_id:
+        OLD_CAT_ID = cat_id
+        CURRENT_STAGE = Stages.VIEWING
+
+    user_voted_status = users_voting_status(cat_id)
     address = get_remote_addr(request)
     return render_template(
         "index.html",
         username=username,
-        categories=get_next_votable_category_id(),
+        voted_status=user_voted_status[username],
         is_host_admin=is_host_address(address),
         curr_stage=CURRENT_STAGE.name,
     )
