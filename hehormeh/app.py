@@ -58,13 +58,12 @@ def index():
     if not username:
         return redirect(url_for("login"))
 
-    # address = get_remote_addr(request)
+    address = get_remote_addr(request)
     return render_template(
         "index.html",
         username=username,
         categories=get_next_votable_category_id(),
-        # is_host_admin=is_host_admin(address), # TODO: change this back later
-        is_host_admin=True,
+        is_host_admin=is_host_address(address),
         curr_stage=CURRENT_STAGE.name,
     )
 
