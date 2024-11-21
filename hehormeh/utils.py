@@ -198,19 +198,11 @@ def generate_server_link_qr_code(addr: str, port: str) -> None:
 
 def idxmedian(series: pd.Series) -> str:
     """Return the index of the median value of the series."""
-    return series.index[np.argsort(series)[len(series) // 2]]
+    return series.index[np.argsort(series.values)[len(series) // 2]]
 
 
 def score_memes():
     """Evaluate meme scores."""
-
-    def get_cat_id(df, image_name):
-        """Get cat id based on image name."""
-        # Query the DataFrame to find the matching img_name
-        result = df[df["img_name"] == image_name]["cat_id"]
-        # Return the cat_id as an integer, or None if not found
-        return result.iloc[0] if not result.empty else None
-
     votes = read_data(VOTES_FILE)
     votes["both"] = votes.funny + votes.cringe
 
@@ -221,14 +213,10 @@ def score_memes():
         ("najnajjazjaz", "funny", "idxmax"),
     ]
 
-    df = read_data(USER_TO_IMAGE_FILE)
-    results = {name: votes.groupby("img_name").sum()[col].agg(func) for name, col, func in aggregations}
-    # Add full path to images so we can display them later
-    results = {
-        award: f"{UPLOAD_PATH}/{ID2CAT_ALL[get_cat_id(df, img_name)]}/{img_name}" for award, img_name in results.items()
-    }
-    # return {name: votes.groupby("img_name").sum()[col].agg(func) for name, col, func in aggregations}
-    return results
+    results = {name: votes.groupby(["cat_id", "img_name"]).sum()[col].agg(func) for name, col, func in aggregations}
+
+    # convert to full path
+    return {award: f"{UPLOAD_PATH}/{ID2CAT[cat_id]}/{img_name}" for award, (cat_id, img_name) in results.items()}
 
 
 def score_users():
