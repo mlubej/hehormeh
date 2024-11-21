@@ -7,8 +7,34 @@
   </head>
 
   <body>
-    <h2>GlasujZameme: {{ cat }}</h2>
     <a href="{{ url_for('index') }}">Go home</a>
+    <br>
+    <h2>Trenutna kategorija:  </h2>
+    <h1>{{ cat }} </h1>
+
+    <div class="expanding-text">
+        <button class="toggle-btn" onclick="toggleText()">Kako glasovat</button>
+        <div class="text-content" id="textContent">
+            <p>
+                Za <b>vsak</b> meme moraš podati oceno koliko ti je meme
+                <ol>
+                    <li>smešen (zgornji drsnik):</li>
+                     <ul>
+                        <li><b>meh</b> - zelo ne smešno</li>
+                        <li><b>heh</b> - OMG umiram haha dbest</li>
+                     </ul>
+                    <li>skremžen (spodnji dregnik):</li>
+                     <ul>
+                        <li><b>🗿</b> - nič skremža</li>
+                        <li><b>FBC</b> (full body cringe) - fizično obolevanje od cringe-a</li>
+                     </ul>
+                </ol>
+              Basically, bolj potegneš drsače v desno, boljšo oceno bo meme dobil.
+
+            </p>
+        </div>
+    </div>
+
     <hr style="width: 100%; height: 5px; background-color: black" />
 
     <form action="/vote" method="post">
@@ -64,6 +90,17 @@ function updateThumbColor(sliderElement) {
     sliderElement.style.setProperty('--thumb-color', thumbColor);
 
   }
+    function toggleText() {
+        const textContent = document.getElementById('textContent');
+        const button = document.querySelector('.toggle-btn');
+        if (textContent.style.display === 'none' || textContent.style.display === '') {
+            textContent.style.display = 'block';
+            button.textContent = 'Skrij me 🤤';
+        } else {
+            textContent.style.display = 'none';
+            button.textContent = 'Kako glasovat';
+        }
+    }
   </script>
   </body>
 </html>
