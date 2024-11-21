@@ -73,7 +73,7 @@ def index():
     return render_template(
         "index.html",
         username=username,
-        voted_status=user_voted_status[username],
+        voted_status=user_voted_status.get(username, False),
         is_host_admin=is_host_address(address),
         curr_stage=CURRENT_STAGE.name,
     )
