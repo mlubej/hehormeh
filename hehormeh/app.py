@@ -181,7 +181,7 @@ def scoreboard():
         return redirect("/scoreboard")
 
     return render_template(
-        "scoreboard.html", score_memes={**score_memes()}, score_users={**score_users()}, stage=CURRENT_STAGE.name
+        "scoreboard.html", score_memes=score_memes(), score_users=score_users(), stage=CURRENT_STAGE.name
     )
 
 
