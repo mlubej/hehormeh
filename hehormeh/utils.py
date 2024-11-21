@@ -203,17 +203,32 @@ def idxmedian(series: pd.Series) -> str:
 
 def score_memes():
     """Evaluate meme scores."""
+
+    def get_cat_id(df, image_name):
+        """Get cat id based on image name."""
+        # Query the DataFrame to find the matching img_name
+        result = df[df["img_name"] == image_name]["cat_id"]
+        # Return the cat_id as an integer, or None if not found
+        return result.iloc[0] if not result.empty else None
+
     votes = read_data(VOTES_FILE)
     votes["both"] = votes.funny + votes.cringe
 
     aggregations = [
-        ("najnajjazjaz", "funny", "idxmax"),
+        ("jazjaz_ravnovesja", "both", idxmedian),
         ("jazjaz_notranje_bolečine", "cringe", "idxmax"),
         ("smesen_ful_majkemi", "both", "idxmax"),
-        ("jazjaz_ravnovesja", "both", idxmedian),
+        ("najnajjazjaz", "funny", "idxmax"),
     ]
 
-    return {name: votes.groupby("img_name").sum()[col].agg(func) for name, col, func in aggregations}
+    df = read_data(USER_TO_IMAGE_FILE)
+    results = {name: votes.groupby("img_name").sum()[col].agg(func) for name, col, func in aggregations}
+    # Add full path to images so we can display them later
+    results = {
+        award: f"{UPLOAD_PATH}/{ID2CAT_ALL[get_cat_id(df, img_name)]}/{img_name}" for award, img_name in results.items()
+    }
+    # return {name: votes.groupby("img_name").sum()[col].agg(func) for name, col, func in aggregations}
+    return results
 
 
 def score_users():
@@ -225,10 +240,10 @@ def score_users():
     votes = pd.merge(votes, uploads, left_index=True, right_index=True).reset_index()
 
     aggregations = [
-        ("meme_lord", "both", "idxmax"),
-        ("skremžni_knez", "cringe", "idxmax"),
-        ("grof_smehoslav", "funny", "idxmax"),
         ("princesa_mediana", "both", idxmedian),
+        ("grof_smehoslav", "funny", "idxmax"),
+        ("skremžni_knez", "cringe", "idxmax"),
+        ("meme_lord", "both", "idxmax"),
     ]
 
     return {name: votes.groupby("author").sum()[col].agg(func) for name, col, func in aggregations}
