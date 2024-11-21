@@ -180,7 +180,9 @@ def scoreboard():
         CURRENT_STAGE = Stages[request.form.get("stage")]
         return redirect("/scoreboard")
 
-    return render_template("scoreboard.html", results={**score_memes(), **score_users()}, stage=CURRENT_STAGE.name)
+    return render_template(
+        "scoreboard.html", score_memes=score_memes(), score_users=score_users(), stage=CURRENT_STAGE.name
+    )
 
 
 @app.route("/admin", methods=["POST", "GET"])
@@ -200,6 +202,7 @@ def admin():
             addr = get_private_ip()
             port = request.environ.get("SERVER_PORT")
             generate_server_link_qr_code(addr, port)
+
         return redirect(request.url)
 
     cat_id = get_next_votable_category_id()

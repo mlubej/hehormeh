@@ -12,14 +12,14 @@
     Logged in as: <b>{{ username }}</b>
     <br>
 
-    {% if curr_stage == "UPLOAD" %}
+    {% if curr_stage == "UPLOAD" and not is_host_admin %}
       <a href="/upload" class="btn-link">Upload memes</a>
 
     <!-- Don't judge :( -->
     <br /><br /><br /><br /><br /><br />
 
     <div class="expanding-text">
-      <button class="toggle-btn" onclick="toggleText('info', 'zapri')">Info</button>
+      <button class="toggle-btn" onclick="toggleText('Info', 'zapri')">Info</button>
       <div class="text-content" id="textContent">
         <p>Počaki, da vsi naložijo svoje meme-tete</p>
       </div>
@@ -31,7 +31,7 @@
     <br /><br /><br /><br /><br /><br />
 
     <div class="expanding-text">
-      <button class="toggle-btn" onclick="toggleText('info', 'gotem')">Info</button>
+      <button class="toggle-btn" onclick="toggleText('Info', 'gotem')">Info</button>
       <div class="text-content" id="textContent">
         <a href="https://emoji.gg/emoji/4882_gotem"
           ><img

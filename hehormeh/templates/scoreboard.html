@@ -42,17 +42,45 @@
       </form>
     {% else %}
       <div>
-        {% for k, v in results.items() %}
-          {{k}}: {{v}} <br>
+        <h2>Najboljši meme-ji</h2>
+        {% for k, v in score_memes.items() %}
+          <div class="expanding-text">
+            <button class="toggle-btn" id="{{k}}{{v}}" onclick="toggleText('{{k}}', 'zapri', '{{k}}', '{{k}}{{v}}')">{{k}}</button>
+            <div class="text-content" id="{{k}}">
+              <img src="{{v}}" />
+            </div>
+          </div>
+        {% endfor %}
+
+        <h2>Najboljši folk</h2>
+        {% for k, v in score_users.items() %}
+          <div class="expanding-text">
+            <button class="toggle-btn" id="{{k}}{{v}}" onclick="toggleText('{{k}}', 'zapri', '{{k}}', '{{k}}{{v}}')">{{k}}</button>
+            <div class="text-content" id="{{k}}">
+              <p><b>{{v}} 🥇</b></p>
+            </div>
+          </div>
         {% endfor %}
       </div>
     {% endif %}
 
     <script>
+      function toggleText(expand_text, close_text, text_ID, button_ID) {
+        const textContent = document.getElementById(text_ID);
+        const button = document.getElementById(button_ID);
+        // const button = document.querySelector(".toggle-btn");
+        if (textContent.style.display === "none" || textContent.style.display === "") {
+          textContent.style.display = "block";
+          button.textContent = close_text;
+        } else {
+          textContent.style.display = "none";
+          button.textContent = expand_text;
+        }
+      }
 
       let interval;
       let current = 0;
-      let stop = 20;
+      let stop = 69;
       let progressBarTextElement = document.getElementById('progress-bar-text');
       let progressBarElement = document.getElementById('progress-bar');
 
@@ -84,6 +112,7 @@
       }
 
       startProgressBar();
+
     </script>
   </body>
 </html>

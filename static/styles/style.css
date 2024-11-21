@@ -93,7 +93,7 @@ body, h1, h2, h3, p, ul, li, a {
 /* Body Styling */
 body {
     font-family: 'Arial', sans-serif;
-    background: linear-gradient(to right, #f8f9fa, #e9ecef);
+    background: #f8f9fa;
     color: #343a40;
     line-height: 1.6;
     margin: 0;
@@ -306,6 +306,7 @@ img {
     margin: 20px 0;
     width: 100%;
     max-width: 600px;
+    background-color:#f8f9fa;
     font-family: 'Arial', sans-serif;
 }
 
