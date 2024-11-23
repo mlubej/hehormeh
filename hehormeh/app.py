@@ -42,10 +42,10 @@ from .utils import (
 
 app = Flask(__name__, static_folder=ROOT_DIR / "static")
 app.config["UPLOAD_FOLDER"] = UPLOAD_PATH
-app.config["MAX_CONTENT_LENGTH"] = 10 * 1024**2  # Limit upload data to 10 MiB
+app.config["MAX_CONTENT_LENGTH"] = 500 * 1024**2  # Limit upload data to 10 MiB
 
 CURRENT_STAGE = Stages.UPLOAD
-CURRENT_CAT_ID = get_next_votable_category_id()
+CURRENT_CAT_ID = 0 #get_next_votable_category_id()
 
 
 def get_remote_addr(request):
