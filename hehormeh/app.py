@@ -146,8 +146,9 @@ def upload_handler(request):
 
     if file and has_valid_extension(file.filename):
         filename = secure_filename(file.filename)
-        hash_name = hashlib.sha256(filename.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
         cat_id = int(request.form.get("cat_id"))
+        hash_seed = f"{username}-{cat_id}-{filename}"
+        hash_name = hashlib.sha256(hash_seed.encode()).hexdigest()[:HASH_SIZE] + Path(filename).suffix
 
         os.makedirs(ROOT_DIR / UPLOAD_PATH / ID2CAT_ALL[cat_id], exist_ok=True)
         file.save(UPLOAD_PATH / ID2CAT_ALL[cat_id] / hash_name)
