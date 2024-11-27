@@ -1,6 +1,10 @@
 # HehOrMeh
 
-Welcome to the HehOrMeh page!
+Welcome to the HehOrMeh! A ~simple~ Flask app for a meme night with your friends.
+
+## Setup
+1. decide on categories
+2. have fun
 
 ## Installation
 
