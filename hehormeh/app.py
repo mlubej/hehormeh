@@ -45,7 +45,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_PATH
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024**2  # Limit upload data to 10 MiB
 
 CURRENT_STAGE = Stages.UPLOAD
-CURRENT_CAT_ID = get_next_votable_category_id()
+CURRENT_CAT_ID = None
 
 
 def get_remote_addr(request):
@@ -63,12 +63,15 @@ def index():
     if not username:
         return redirect(url_for("login"))
 
-    new_cat_it = get_next_votable_category_id()
-    if CURRENT_CAT_ID != new_cat_it:
-        CURRENT_CAT_ID = new_cat_it
-        CURRENT_STAGE = Stages.VIEWING
+    new_cat_id = None
+    user_voted_status = {}
+    if CURRENT_STAGE == Stages.VOTING:
+        new_cat_it = get_next_votable_category_id()
+        user_voted_status = users_voting_status(new_cat_id)
+        if CURRENT_CAT_ID != new_cat_it:
+            CURRENT_CAT_ID = new_cat_it
+            CURRENT_STAGE = Stages.VIEWING
 
-    user_voted_status = users_voting_status(new_cat_it)
     address = get_remote_addr(request)
     return render_template(
         "index.html",
